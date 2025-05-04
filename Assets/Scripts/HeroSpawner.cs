@@ -1,5 +1,7 @@
 using System.Collections.Generic;
 using UnityEngine;
+using System.Collections;
+
 
 /// <summary>
 /// 전투가 끝날 때마다 점점 더 강한 용사를 생성하는 스폰 시스템.
@@ -21,6 +23,7 @@ public class HeroSpawner : MonoBehaviour
     [Tooltip("보스가 등장할 때 추가되는 HP")]
     [SerializeField] private int bossHpBoost = 5;
 
+    private bool isResetting = false;
     private int currentHeroMaxHp = 1;
     private int currentHeroCount = 1;
     private List<GameObject> aliveHeroes = new List<GameObject>();
@@ -33,24 +36,36 @@ public class HeroSpawner : MonoBehaviour
     /// <summary>
     /// 현재 웨이브에 맞는 용사들을 생성합니다.
     /// </summary>
-    private void SpawnCurrentWave()
+private void SpawnCurrentWave()
+{
+    Debug.Log($"🛡 Hero 웨이브 생성! 수: {currentHeroCount}, Max HP: {currentHeroMaxHp}");
+    aliveHeroes.Clear();
+
+    float xGap = 0.8f;     // 좌우 간격
+    float yGap = 0.6f;     // 상하 간격
+    int columns = 2;       // 한 줄에 배치할 용사 수
+
+    for (int i = 0; i < currentHeroCount; i++)
     {
-        aliveHeroes.Clear();
+        int col = i % columns;           // 0, 1, 0, 1 ...
+        int row = i / columns;           // 0, 0, 1, 1 ...
 
-        for (int i = 0; i < currentHeroCount; i++)
+        Vector3 offset = new Vector3(col * xGap, -row * yGap, 0f);
+        Vector3 finalPosition = spawnPosition + offset;
+
+        GameObject hero = Instantiate(heroPrefab, finalPosition, Quaternion.identity);
+        Debug.Log($"Hero 생성됨 위치: {finalPosition}");
+        Hero heroScript = hero.GetComponent<Hero>();
+
+        if (heroScript != null)
         {
-            GameObject hero = Instantiate(heroPrefab, spawnPosition, Quaternion.identity);
-            Hero heroScript = hero.GetComponent<Hero>();
-
-            if (heroScript != null)
-            {
-                int heroHp = CalculateHpForHero(i);
-                heroScript.Initialize(heroHp, this);
-            }
-
-            aliveHeroes.Add(hero);
+            int heroHp = CalculateHpForHero(i);
+            heroScript.Initialize(heroHp, this);
         }
+
+        aliveHeroes.Add(hero);
     }
+}
 
     /// <summary>
     /// 각 용사의 HP를 계산합니다.
@@ -73,6 +88,10 @@ public class HeroSpawner : MonoBehaviour
     /// </summary>
     public void OnHeroDeath(GameObject hero)
     {
+        Debug.Log("📢 OnHeroDeath 호출됨");
+
+        if (isResetting) return;
+
         if (aliveHeroes.Contains(hero))
         {
             aliveHeroes.Remove(hero);
@@ -107,13 +126,26 @@ public class HeroSpawner : MonoBehaviour
     /// </summary>
     public void ResetSpawner()
     {
+        Debug.Log("🌀 HeroSpawner 초기화 시작!");
+
+        isResetting = true;
+
         foreach (var hero in aliveHeroes)
         {
             if (hero != null)
                 Destroy(hero);
         }
 
+        StartCoroutine(ClearAndRespawn()); // ✅ 코루틴으로 넘김
+    }
+
+    private IEnumerator ClearAndRespawn()
+    {
+        yield return null; // 한 프레임 기다림
+
         aliveHeroes.Clear();
         SpawnCurrentWave();
+
+        isResetting = false;
     }
 }
