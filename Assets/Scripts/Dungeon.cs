@@ -84,4 +84,18 @@ public class Dungeon : MonoBehaviour
 
         // TODO: Unity 6 업그레이드 시, 리셋 시점에 화면 페이드 연출 추가 예정
     }
+    public void IncreaseHp(int amount)
+    {
+        maxHp += amount;
+        Debug.Log($"던전 최대 체력 증가! 현재 Max HP: {maxHp}");
+    }
+
+    public void IncreaseMaxHp(int amount)
+    {
+        maxHp += amount;
+        currentHp += amount; // 옵션: 최대 체력 증가 시 현재 체력도 회복할지
+        Debug.Log($"❤️ 던전 최대 체력 증가! 현재: {currentHp}/{maxHp}");
+    }
+
+
 }
