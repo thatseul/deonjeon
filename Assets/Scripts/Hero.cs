@@ -1,8 +1,10 @@
+// Hero.cs
+using System.Collections;
 using UnityEngine;
 
 /// <summary>
 /// 일정 속도로 왼쪽으로 이동하며,
-/// 던전과 충돌 시 데미지를 주고 사라지는 용사.
+/// 던전이나 장애물과 충돌 시 멈춰서 서로 공격하는 용사.
 /// </summary>
 public class Hero : MonoBehaviour
 {
@@ -10,7 +12,12 @@ public class Hero : MonoBehaviour
     [Tooltip("초당 이동 속도")]
     [SerializeField] private float moveSpeed = 2f;
 
+    private bool isFighting = false;
+    private Rigidbody2D rb;
+
     private HeroSpawner spawner;
+    private Dungeon dungeonTarget;
+    private Coroutine damageCoroutine;
 
     [Header("체력 설정")]
     [Tooltip("용사의 최대 체력")]
@@ -18,6 +25,10 @@ public class Hero : MonoBehaviour
 
     [Tooltip("용사의 현재 체력")]
     private int currentHp;
+
+    [Header("공격 설정")]
+    [Tooltip("초당 공격력")]
+    [SerializeField] private int attackPowerPerSecond = 1;
 
     /// <summary>
     /// HeroSpawner에서 생성 시 초기화용.
@@ -28,51 +39,97 @@ public class Hero : MonoBehaviour
         currentHp = hp;
         spawner = heroSpawner;
 
-        Debug.Log($"🧠 Hero 초기화됨! currentHp={currentHp}, RigidbodyType={GetComponent<Rigidbody2D>().bodyType}");
+        rb = GetComponent<Rigidbody2D>();
+
+        Debug.Log($"🧠 Hero 초기화됨! currentHp={currentHp}, RigidbodyType={rb.bodyType}");
     }
 
     private void Update()
     {
-        // 왼쪽으로 이동
-        transform.Translate(Vector2.left * moveSpeed * Time.deltaTime);
+        if (!isFighting)
+        {
+            transform.Translate(Vector2.left * moveSpeed * Time.deltaTime);
+        }
+    }
+
+    private void OnTriggerEnter2D(Collider2D other)
+    {
+        // Hero끼리의 충돌은 무시
+        if (other.CompareTag("Hero")) return;
+
+        // 이미 죽은 히어로는 충돌 반응하지 않음
+        if (currentHp <= 0) return;
+
+        // 전투 시작: 이동 멈추고 공격 코루틴 시작
+        isFighting = true;
+        rb.velocity = Vector2.zero;
+
+        Debug.Log($"⚔️ Hero 전투 시작! 충돌 대상: {other.name}");
+
+        // 던전이면 참조 보관하여 데미지 줌
+        if (other.TryGetComponent<Dungeon>(out Dungeon dungeon))
+        {
+            dungeonTarget = dungeon;
+        }
+
+        // 전투 시작
+        damageCoroutine = StartCoroutine(FightLoop());
+    }
+
+    private void OnTriggerExit2D(Collider2D other)
+    {
+        // Hero끼리 나간 건 무시
+        if (other.CompareTag("Hero")) return;
+
+        Debug.Log("🏃 Hero 충돌 해제 - 전투 종료");
+        StopCombat();
+    }
+
+    /// <summary>
+    /// 전투 루프 - 초당 서로 공격
+    /// </summary>
+    private IEnumerator FightLoop()
+    {
+        while (currentHp > 0)
+        {
+            yield return new WaitForSeconds(1f);
+
+            // Hero가 Dungeon에 데미지 줌
+            if (dungeonTarget != null)
+            {
+                dungeonTarget.TakeDamage(attackPowerPerSecond);
+            }
+
+            // Dungeon이 Hero에게 데미지 줌
+            if (dungeonTarget != null)
+            {
+                currentHp -= dungeonTarget.AttackPower;
+                Debug.Log($"💢 Hero 피해 중! 남은 HP: {currentHp}/{maxHp}");
+
+                if (currentHp <= 0)
+                {
+                    Debug.Log("💀 Hero 사망 처리");
+                    spawner?.OnHeroDeath(gameObject);
+                    Destroy(gameObject);
+                }
+            }
+        }
+    }
+
+    private void StopCombat()
+    {
+        isFighting = false;
+        dungeonTarget = null;
+
+        if (damageCoroutine != null)
+        {
+            StopCoroutine(damageCoroutine);
+            damageCoroutine = null;
+        }
     }
 
     private void OnDestroy()
     {
         Debug.Log("💀 Hero 파괴됨");
-    }
-
-    private void OnTriggerEnter2D(Collider2D other)
-    {
-        Debug.Log($"⚔️ Hero 충돌 감지! 대상: {other.name}, 레이어: {LayerMask.LayerToName(other.gameObject.layer)}");
-
-        // 던전과 충돌했는지 확인
-        if (other.TryGetComponent<Dungeon>(out Dungeon dungeon))
-        {
-            Debug.Log($"🗡 Hero가 Dungeon에게 데미지를 줌! Dungeon 현재 HP: {dungeon.CurrentHp}");
-
-            dungeon.TakeDamage(1);
-            spawner?.OnHeroDeath(gameObject);
-
-            // 바로 Destroy 시 로그 유실 가능 → 한 프레임 뒤에 제거
-            StartCoroutine(DestroyNextFrame());
-        }
-        else
-        {
-            Debug.LogWarning("❌ Dungeon 컴포넌트 없음. 충돌한 오브젝트의 컴포넌트 목록:");
-            foreach (var comp in other.GetComponents<Component>())
-            {
-                Debug.Log($"🔍 {comp.GetType().Name}");
-            }
-        }
-    }
-
-    /// <summary>
-    /// Destroy 지연 처리: 로그 출력 보장 및 충돌 안정화
-    /// </summary>
-    private System.Collections.IEnumerator DestroyNextFrame()
-    {
-        yield return null;
-        Destroy(gameObject);
     }
 }
