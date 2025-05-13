@@ -1,55 +1,40 @@
-// Dungeon.cs
 using UnityEngine;
 
 /// <summary>
-/// 플레이어가 조작하는 던전 오브젝트. 
-/// 체력이 0이 되면 상태를 초기화하고, 반복적인 게임 루프를 유지함.
-/// 앞으로 공격력 시스템 추가 예정.
+/// 플레이어가 조작하는 던전 본체. 체력과 공격력을 DungeonStatsManager에서 가져와 사용합니다.
 /// </summary>
 public class Dungeon : MonoBehaviour
 {
-    [Header("던전 체력 설정")]
-    [Tooltip("던전의 최대 체력입니다. 반복 루프 시 항상 이 수치로 복원됩니다.")]
-    [SerializeField] private int maxHp = 30;
+    [Header("스탯 관리자")]
+    [Tooltip("Dungeon의 능력치를 관리하는 스크립트입니다.")]
+    [SerializeField] private DungeonStatsManager statsManager;
 
-    [Header("던전 공격력 설정")]
-    [Tooltip("던전이 초당 입히는 데미지. 몬스터 대신 용사의 체력을 깎는 데 사용됩니다.")]
-    [SerializeField] private int attackPowerPerSecond = 1;
+    public float AttackSpeed => statsManager.GetStatValue("ASPD");
 
-    public int AttackPower => attackPowerPerSecond;
-
-    /// <summary>
-/// Dungeon의 공격력을 증가시킵니다. (예: 업그레이드 시 호출)
-/// </summary>
-    public void IncreaseAttackPower(int amount)
-    {
-        attackPowerPerSecond += amount;
-        Debug.Log($"⚔️ Dungeon 공격력 증가! 현재 공격력: {attackPowerPerSecond}");
-    }
-
-
-    private int currentHp;
+    private float currentHp;
     private bool isDead = false;
 
     private void Start()
     {
-        currentHp = maxHp;
+        currentHp = MaxHp;
     }
 
+    public float MaxHp => statsManager.GetStatValue("HP");
+    public float AttackPower => statsManager.GetStatValue("ATK");
+
     /// <summary>
-    /// 던전이 용사에게 공격받을 때 호출됩니다.
+    /// 용사에게 피해를 받았을 때 호출됩니다.
     /// </summary>
-    /// <param name="damage">받는 피해량</param>
     public void TakeDamage(int damage)
     {
         if (isDead)
         {
-            Debug.Log("🛑 데미지 무시됨: 던전 이미 죽음");
+            Debug.Log("🛑 데미지 무시됨: 던전 이미 사망 상태");
             return;
         }
 
         currentHp -= damage;
-        Debug.Log($"💢 Dungeon 데미지 받음! 남은 HP: {currentHp}/{maxHp}");
+        Debug.Log($"💢 데미지 {damage} 입음! 현재 HP: {currentHp}/{MaxHp}");
 
         if (currentHp <= 0)
         {
@@ -61,41 +46,30 @@ public class Dungeon : MonoBehaviour
     }
 
     /// <summary>
-    /// 던전 체력을 복원하고, 모든 용사와 전투 상황을 초기화합니다.
+    /// 던전 체력을 복원하고 게임 상태를 초기화합니다.
     /// </summary>
     private void ResetDungeonState()
     {
-        currentHp = maxHp;
+        currentHp = MaxHp;
         isDead = false;
-        Debug.Log($"✅ Dungeon 리셋됨! currentHp={currentHp}, isDead={isDead}");
+        Debug.Log($"✅ Dungeon 리셋 완료! currentHp={currentHp}, isDead={isDead}");
 
-        // 화면에 있는 모든 Hero 제거
+        // 모든 히어로 제거
         foreach (var hero in GameObject.FindGameObjectsWithTag("Hero"))
         {
             Destroy(hero);
         }
 
-        // Hero 스폰 시스템 초기화
-        HeroSpawner spawner = FindObjectOfType<HeroSpawner>();
+        // 히어로 스폰 재시작
+        HeroSpawner spawner = FindFirstObjectByType<HeroSpawner>();
         if (spawner != null)
         {
-            spawner.ResetSpawner(); // TODO: 이 함수는 HeroSpawner에서 구현되어 있어야 함
+            spawner.ResetSpawner();
         }
 
-        // TODO: Unity 6 업그레이드 시, 리셋 시점에 화면 페이드 연출 추가 예정
-    }
-    public void IncreaseHp(int amount)
-    {
-        maxHp += amount;
-        Debug.Log($"던전 최대 체력 증가! 현재 Max HP: {maxHp}");
+        // TODO: 리셋 시 페이드 연출 추가 예정
     }
 
-    public void IncreaseMaxHp(int amount)
-    {
-        maxHp += amount;
-        currentHp += amount; // 옵션: 최대 체력 증가 시 현재 체력도 회복할지
-        Debug.Log($"❤️ 던전 최대 체력 증가! 현재: {currentHp}/{maxHp}");
-    }
-
-
+    // 공격력을 직접 증가시키는 방식은 제거됨
+    // 모든 스탯은 DungeonStatsManager에서 관리
 }

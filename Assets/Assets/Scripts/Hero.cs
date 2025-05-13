@@ -7,7 +7,7 @@ public class Hero : MonoBehaviour
     [SerializeField] private int attackPowerPerSecond = 1;
 
     private int maxHp;
-    private int currentHp;
+    private float currentHp;
 
     private bool isFighting = false;
     private bool isDead = false;
@@ -50,7 +50,17 @@ public class Hero : MonoBehaviour
     {
         while (currentHp > 0)
         {
-            yield return new WaitForSeconds(1f);
+            //공격 속도에 따라 대기 시간 계산
+            float attackInterval = 1f;
+
+            if (dungeonTarget != null)
+            {
+                float aspd = dungeonTarget.AttackSpeed; // 초당 공격 횟수
+                attackInterval = 1f / aspd;
+            }
+
+            yield return new WaitForSeconds(attackInterval);
+
 
             if (dungeonTarget == null)
                 yield break;

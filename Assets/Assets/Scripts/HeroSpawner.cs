@@ -54,7 +54,6 @@ private void SpawnCurrentWave()
         Vector3 finalPosition = spawnPosition + offset;
 
         GameObject hero = Instantiate(heroPrefab, finalPosition, Quaternion.identity);
-        Debug.Log($"Hero 생성됨 위치: {finalPosition}");
         Hero heroScript = hero.GetComponent<Hero>();
 
         if (heroScript != null)
