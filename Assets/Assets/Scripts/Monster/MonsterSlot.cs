@@ -1,31 +1,43 @@
-// MonsterSlot.cs
 using UnityEngine;
 using UnityEngine.UI;
+using UnityEngine.EventSystems;
 
-public class MonsterSlot : MonoBehaviour
+/// <summary>
+/// 인벤토리 슬롯에 들어가는 몬스터 정보 + 드래그 기능 포함
+/// </summary>
+public class MonsterSlot : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndDragHandler
 {
-    [Header("몬스터 이미지 표시용")]
+    [Header("몬스터 아이콘 이미지")]
+    [Tooltip("몬스터 아이콘이 표시될 UI 이미지")]
     [SerializeField] private Image monsterIcon;
 
-    private MonsterItem assignedMonster;
+    private MonsterItem assignedMonster;          // 현재 슬롯에 배정된 몬스터
+    private GameObject dragIcon;                  // 드래그 시 따라다닐 UI 아이콘
+    private Canvas parentCanvas;                  // 최상위 캔버스 (UI 좌표 정렬용)
 
+    /// <summary> 슬롯이 비어있는지 여부 </summary>
     public bool IsEmpty => assignedMonster == null;
 
+    private void Awake()
+    {
+        parentCanvas = GetComponentInParent<Canvas>();
+    }
+
     /// <summary>
-    /// 슬롯에 몬스터 배치
+    /// 슬롯에 몬스터 배정 및 아이콘 표시
     /// </summary>
-    public void AssignMonster(MonsterItem monster)
+    public void SetMonster(MonsterItem monster)
     {
         assignedMonster = monster;
-        if (monsterIcon != null && monster != null)
+        if (monsterIcon != null && monster != null && monster.monsterIcon != null)
         {
-            monsterIcon.sprite = monster.monsterIcon; // MonsterItem에서 Sprite 반환하는 메서드 필요
+            monsterIcon.sprite = monster.monsterIcon;
             monsterIcon.enabled = true;
         }
     }
 
     /// <summary>
-    /// 슬롯 비우기
+    /// 슬롯을 비움 (아이콘 숨김)
     /// </summary>
     public void ClearSlot()
     {
@@ -38,21 +50,39 @@ public class MonsterSlot : MonoBehaviour
     }
 
     /// <summary>
-    /// 현재 배정된 몬스터 가져오기
+    /// 현재 슬롯의 몬스터 정보 반환
     /// </summary>
     public MonsterItem GetAssignedMonster()
     {
         return assignedMonster;
     }
 
-    public void SetMonster(MonsterItem monster)
-{
-    assignedMonster = monster;
+    // ------------------------ 드래그 관련 ------------------------
 
-    if (monsterIcon != null && monster.monsterIcon != null)
+    public void OnBeginDrag(PointerEventData eventData)
     {
-        monsterIcon.sprite = monster.monsterIcon;
-        monsterIcon.enabled = true;
+        if (assignedMonster == null) return;
+
+        // 드래그 시 보여줄 아이콘 생성
+        dragIcon = new GameObject("DragIcon");
+        dragIcon.transform.SetParent(parentCanvas.transform, false);
+
+        Image image = dragIcon.AddComponent<Image>();
+        image.sprite = assignedMonster.monsterIcon;
+        image.raycastTarget = false;
+
+        dragIcon.transform.SetAsLastSibling(); // UI 가장 위에 위치
     }
-}
+
+    public void OnDrag(PointerEventData eventData)
+    {
+        if (dragIcon != null)
+            dragIcon.transform.position = eventData.position;
+    }
+
+    public void OnEndDrag(PointerEventData eventData)
+    {
+        if (dragIcon != null)
+            Destroy(dragIcon);
+    }
 }

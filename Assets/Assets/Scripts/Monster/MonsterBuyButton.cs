@@ -1,39 +1,43 @@
 using UnityEngine;
 using UnityEngine.UI;
+using System.Collections.Generic;
+
 
 public class MonsterBuyButton : MonoBehaviour
 {
-    [Tooltip("구매할 몬스터 정보")]
-    [SerializeField] private MonsterItem monsterToBuy;
+    [Tooltip("소환 가능한 몬스터 리스트")]
+    [SerializeField] private List<MonsterItem> availableMonsters;
 
-    [Tooltip("인벤토리 매니저")]
     [SerializeField] private MonsterInventoryManager inventoryManager;
-
-    [Tooltip("구매 버튼")]
     [SerializeField] private Button buyButton;
 
     private void Start()
     {
         if (buyButton != null)
-        {
-            buyButton.onClick.AddListener(BuyMonster);
-        }
-    }
+            buyButton.onClick.AddListener(BuyRandomMonster);
+    } 
 
-    private void BuyMonster()
+    private void BuyRandomMonster()
     {
-        if (GoldManager.Instance.GetCurrentGold() >= monsterToBuy.cost)
+        if (availableMonsters == null || availableMonsters.Count == 0)
         {
-            bool success = inventoryManager.AddMonsterToInventory(monsterToBuy);
+            Debug.LogWarning("❌ 몬스터 리스트가 비어 있습니다.");
+            return;
+        }
 
+        MonsterItem selected = availableMonsters[Random.Range(0, availableMonsters.Count)];
+
+        if (GoldManager.Instance.GetCurrentGold() >= selected.cost)
+        {
+            bool success = inventoryManager.AddMonsterToInventory(selected);
             if (success)
             {
-                GoldManager.Instance.SpendGold(monsterToBuy.cost);
-                Debug.Log($"🛒 {monsterToBuy.monsterName} 구매 성공!");
+                GoldManager.Instance.SpendGold(selected.cost);
+                Debug.Log($"🛒 랜덤 구매 성공: {selected.monsterName}");
             }
             else
             {
-                Debug.LogWarning("❌ 구매 실패: 인벤토리에 공간 없음");
+                Debug.LogWarning("❌ 인벤토리에 빈 슬롯이 없습니다!");
             }
         }
         else
