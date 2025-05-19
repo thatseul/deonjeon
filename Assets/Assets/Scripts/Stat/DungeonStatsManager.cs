@@ -16,6 +16,21 @@ public class DungeonStatsManager : MonoBehaviour
     [Tooltip("모든 능력치가 이 업그레이드 레벨 이상일 경우 던전 레벨이 상승합니다.")]
     public int upgradeThreshold = 3;
 
+    public static DungeonStatsManager Instance { get; private set; }
+
+    private void Awake()
+    {
+        if (Instance == null)
+        {
+            Instance = this;
+            DontDestroyOnLoad(gameObject); // 씬 이동해도 살아 있게 유지
+        }
+        else
+        {
+            Destroy(gameObject); // 중복 방지
+        }
+    }
+
     private void Start()
     {
         if (stats == null || stats.Count == 0)
