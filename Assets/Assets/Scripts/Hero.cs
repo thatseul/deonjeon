@@ -39,6 +39,11 @@ public class Hero : MonoBehaviour
         isFighting = true;
         rb.linearVelocity = Vector2.zero;
 
+        if (other.CompareTag("Monster"))
+        {
+            return;
+        }
+
         if (other.TryGetComponent<Dungeon>(out Dungeon dungeon))
         {
             dungeonTarget = dungeon;

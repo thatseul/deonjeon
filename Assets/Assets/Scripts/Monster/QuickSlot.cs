@@ -1,5 +1,6 @@
 using UnityEngine;
 using UnityEngine.EventSystems;
+using UnityEngine.UI;
 
 public class QuickSlot : MonoBehaviour, IDropHandler
 {
@@ -11,11 +12,16 @@ public class QuickSlot : MonoBehaviour, IDropHandler
     [Tooltip("DungeonStatsManager 참조")]
     [SerializeField] private DungeonStatsManager statsManager;
 
+    [Header("UI 이미지 표시용")]
+    [SerializeField] private Image slotImage;
+
     public void OnDrop(PointerEventData eventData)
     {
         // 드래그된 오브젝트에서 MonsterSlot 컴포넌트 가져오기
         MonsterSlot draggedSlot = eventData.pointerDrag?.GetComponent<MonsterSlot>();
         if (draggedSlot == null) return;
+
+        Debug.Log("🔍 소환 위치: " + summonPosition.position);
 
         // 해당 슬롯에 있는 몬스터 정보 가져오기
         MonsterItem item = draggedSlot.GetAssignedMonster();
@@ -44,5 +50,13 @@ public class QuickSlot : MonoBehaviour, IDropHandler
         {
             Debug.LogWarning("⚠️ Monster.cs 컴포넌트가 프리팹에 없음!");
         }
+
+        // UI 이미지 표시
+        if (slotImage != null)
+        {
+            slotImage.sprite = item.monsterIcon; // MonsterItem 안에 Sprite 아이콘이 있어야 함
+            slotImage.color = Color.white;       // 혹시 투명할 수도 있어서 색상 흰색
+        }
+
     }
 }

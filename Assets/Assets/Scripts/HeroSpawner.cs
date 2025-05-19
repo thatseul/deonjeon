@@ -28,43 +28,50 @@ public class HeroSpawner : MonoBehaviour
     private int currentHeroCount = 1;
     private List<GameObject> aliveHeroes = new List<GameObject>();
 
-    private void Start()
-    {
-        SpawnCurrentWave();
-    }
+
+    private IEnumerator Start()
+{
+    // 던전이 완전히 생성되고 Start()까지 실행
+    yield return new WaitUntil(() => FindFirstObjectByType<Dungeon>() != null);
+
+    // 추가로 한 프레임만 더
+    yield return null;
+
+    SpawnCurrentWave();
+}
 
     /// <summary>
     /// 현재 웨이브에 맞는 용사들을 생성합니다.
     /// </summary>
-private void SpawnCurrentWave()
-{
-    Debug.Log($"🛡 Hero 웨이브 생성! 수: {currentHeroCount}, Max HP: {currentHeroMaxHp}");
-    aliveHeroes.Clear();
-
-    float xGap = 0.8f;     // 좌우 간격
-    float yGap = 0.6f;     // 상하 간격
-    int columns = 2;       // 한 줄에 배치할 용사 수
-
-    for (int i = 0; i < currentHeroCount; i++)
+    private void SpawnCurrentWave()
     {
-        int col = i % columns;           // 0, 1, 0, 1 ...
-        int row = i / columns;           // 0, 0, 1, 1 ...
+        Debug.Log($"🛡 Hero 웨이브 생성! 수: {currentHeroCount}, Max HP: {currentHeroMaxHp}");
+        aliveHeroes.Clear();
 
-        Vector3 offset = new Vector3(col * xGap, -row * yGap, 0f);
-        Vector3 finalPosition = spawnPosition + offset;
+        float xGap = 0.8f;     // 좌우 간격
+        float yGap = 0.6f;     // 상하 간격
+        int columns = 2;       // 한 줄에 배치할 용사 수
 
-        GameObject hero = Instantiate(heroPrefab, finalPosition, Quaternion.identity);
-        Hero heroScript = hero.GetComponent<Hero>();
-
-        if (heroScript != null)
+        for (int i = 0; i < currentHeroCount; i++)
         {
-            int heroHp = CalculateHpForHero(i);
-            heroScript.Initialize(heroHp, this);
-        }
+            int col = i % columns;           // 0, 1, 0, 1 ...
+            int row = i / columns;           // 0, 0, 1, 1 ...
 
-        aliveHeroes.Add(hero);
+            Vector3 offset = new Vector3(col * xGap, -row * yGap, 0f);
+            Vector3 finalPosition = spawnPosition + offset;
+
+            GameObject hero = Instantiate(heroPrefab, finalPosition, Quaternion.identity);
+            Hero heroScript = hero.GetComponent<Hero>();
+
+            if (heroScript != null)
+            {
+                int heroHp = CalculateHpForHero(i);
+                heroScript.Initialize(heroHp, this);
+            }
+
+            aliveHeroes.Add(hero);
+        }
     }
-}
 
     /// <summary>
     /// 각 용사의 HP를 계산합니다.
