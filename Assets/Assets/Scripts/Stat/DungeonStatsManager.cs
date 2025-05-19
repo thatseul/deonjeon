@@ -23,26 +23,26 @@ public class DungeonStatsManager : MonoBehaviour
         if (Instance == null)
         {
             Instance = this;
-            DontDestroyOnLoad(gameObject); // 씬 이동해도 살아 있게 유지
+            DontDestroyOnLoad(gameObject);
         }
         else
         {
-            Destroy(gameObject); // 중복 방지
+            Destroy(gameObject);
+            return;
         }
-    }
 
-    private void Start()
-    {
         if (stats == null || stats.Count == 0)
         {
             stats = new List<DungeonStat>
-            {
-                new DungeonStat("HP", 100),
-                new DungeonStat("ATK", 10),
-                new DungeonStat("ASPD", 1)
-            };
+        {
+            new DungeonStat("HP", 100),
+            new DungeonStat("ATK", 10),
+            new DungeonStat("ASPD", 1)
+        };
         }
     }
+
+
 
     /// <summary>
     /// 특정 능력치를 업그레이드합니다.

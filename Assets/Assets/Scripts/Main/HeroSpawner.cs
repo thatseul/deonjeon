@@ -29,16 +29,10 @@ public class HeroSpawner : MonoBehaviour
     private List<GameObject> aliveHeroes = new List<GameObject>();
 
 
-    private IEnumerator Start()
-{
-    // 던전이 완전히 생성되고 Start()까지 실행
-    yield return new WaitUntil(() => FindFirstObjectByType<Dungeon>() != null);
-
-    // 추가로 한 프레임만 더
-    yield return null;
-
-    SpawnCurrentWave();
-}
+    private void Start()
+    {
+        SpawnCurrentWave();
+    }
 
     /// <summary>
     /// 현재 웨이브에 맞는 용사들을 생성합니다.

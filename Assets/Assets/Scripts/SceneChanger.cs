@@ -17,10 +17,13 @@ public class SceneChanger : MonoBehaviour
             SceneManager.LoadScene(bossSceneName, LoadSceneMode.Additive);
             Debug.Log($"✅ 보스씬 {bossSceneName} Additive로 로드 완료");
         }
-        else
-        {
-            Debug.Log($"⚠️ 보스씬 {bossSceneName} 이미 로드되어 있음");
-        }
+
+        // 👉 메인 씬의 모든 시각 요소 비활성화
+        GameObject mainUI = GameObject.Find("MainUI"); // 너 UI 이름에 맞게 수정
+        if (mainUI != null) mainUI.SetActive(false);
+
+        Camera mainCam = Camera.main;
+        if (mainCam != null) mainCam.gameObject.SetActive(false);
     }
 
     /// <summary>
@@ -31,11 +34,13 @@ public class SceneChanger : MonoBehaviour
         if (SceneManager.GetSceneByName(bossSceneName).isLoaded)
         {
             SceneManager.UnloadSceneAsync(bossSceneName);
-            Debug.Log($"🏃 보스씬 {bossSceneName} 언로드 완료, 메인씬 유지됨");
+            Debug.Log($"🏃 보스씬 {bossSceneName} 언로드 완료, 메인씬 UI 복원");
         }
-        else
-        {
-            Debug.Log($"⚠️ 보스씬 {bossSceneName}은 현재 로드되지 않았음");
-        }
+
+        GameObject mainUI = GameObject.Find("MainUI"); // 실제 오브젝트 이름으로 수정
+        if (mainUI != null) mainUI.SetActive(true);
+
+        Camera mainCam = Camera.main;
+        if (mainCam != null) mainCam.gameObject.SetActive(true);
     }
 }
