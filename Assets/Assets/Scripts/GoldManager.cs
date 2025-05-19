@@ -25,6 +25,8 @@ public class GoldManager : MonoBehaviour
         else
         {
             Instance = this;
+            DontDestroyOnLoad(gameObject);
+
         }
     }
 
