@@ -5,10 +5,17 @@ EditorBuildSettings:
   m_ObjectHideFlags: 0
   serializedVersion: 2
   m_Scenes:
-  - enabled: 1
+  - enabled: 0
     path: Assets/Scenes/SampleScene.unity
     guid: 8c9cfa26abfee488c85f1582747f6a02
+  - enabled: 1
+    path: Assets/Assets/Scenes/deonjeon2020.unity
+    guid: 39dba1b8d69b178439cb3a76d8c6b451
+  - enabled: 1
+    path: Assets/Assets/Scenes/BossScene.unity
+    guid: 2df7e6a7dd5bceb4f982ec8e2deedca5
   m_configObjects:
+    com.unity.adaptiveperformance.loader_settings: {fileID: 11400000, guid: 9f56ff36956b3e244ba41b6bd76d904a, type: 2}
     com.unity.adaptiveperformance.simulator.provider_settings: {fileID: 11400000, guid: 8f93cc492eaab9f4db76a5cf48131810, type: 2}
     com.unity.input.settings.actions: {fileID: -944628639613478452, guid: 2bcd2660ca9b64942af0de543d8d7100, type: 3}
   m_UseUCBPForAssetBundles: 0

@@ -25,6 +25,8 @@ public class GoldManager : MonoBehaviour
         else
         {
             Instance = this;
+            DontDestroyOnLoad(gameObject);
+
         }
     }
 
@@ -35,7 +37,7 @@ public class GoldManager : MonoBehaviour
     /// <summary>
     /// 골드 추가 (기본값: 1)
     /// </summary>
-    public void AddGold(int amount = 1)
+    public void AddGold(int amount = 10)
     {
         currentGold += amount;
         Debug.Log($"💰 골드 획득! 현재 골드: {currentGold}");
