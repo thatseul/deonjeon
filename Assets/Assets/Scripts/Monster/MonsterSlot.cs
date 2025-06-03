@@ -13,7 +13,8 @@ public class MonsterSlot : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndD
 
     private MonsterItem assignedMonster;          // 현재 슬롯에 배정된 몬스터
     private GameObject dragIcon;                  // 드래그 시 따라다닐 UI 아이콘
-    private Canvas parentCanvas;                  // 최상위 캔버스 (UI 좌표 정렬용)
+    private Canvas parentCanvas;
+    private CanvasGroup canvasGroup;                  // 최상위 캔버스 (UI 좌표 정렬용)
 
     /// <summary> 슬롯이 비어있는지 여부 </summary>
     public bool IsEmpty => assignedMonster == null;
@@ -21,6 +22,7 @@ public class MonsterSlot : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndD
     private void Awake()
     {
         parentCanvas = GetComponentInParent<Canvas>();
+        canvasGroup = GetComponent<CanvasGroup>();
     }
 
     /// <summary>
@@ -63,6 +65,8 @@ public class MonsterSlot : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndD
     {
         if (assignedMonster == null) return;
 
+        canvasGroup.blocksRaycasts = false;
+
         // 드래그 시 보여줄 아이콘 생성
         dragIcon = new GameObject("DragIcon");
         dragIcon.transform.SetParent(parentCanvas.transform, false);
@@ -84,5 +88,7 @@ public class MonsterSlot : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndD
     {
         if (dragIcon != null)
             Destroy(dragIcon);
+
+        canvasGroup.blocksRaycasts = true;
     }
 }

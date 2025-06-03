@@ -52,7 +52,7 @@ public class MonsterBuyButton : MonoBehaviour
         GameObject icon = Instantiate(monsterIconPrefab, monsterInvenPanel);
 
         // MonsterItem 정보 적용 (이름, 아이콘 등)
-        icon.GetComponent<MonsterIcon>()?.Setup(selected);
+        icon.GetComponent<MonsterIcon>()?.SetMonsterItem(selected);
 
         // 랜덤 위치 지정
         Vector2 size = monsterInvenPanel.rect.size;

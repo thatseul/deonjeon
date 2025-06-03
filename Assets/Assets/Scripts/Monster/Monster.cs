@@ -16,6 +16,7 @@ public class Monster : MonoBehaviour
     /// </summary>
     public void Init(float dungeonHp, float dungeonAtk, float dungeonASPD, float ratio)
     {
+        Debug.Log($"🐲 Init 호출됨: HP={hp}, ATK={atk}, ASPD={aspd}, SCALE={ratio}");
         hp = dungeonHp * ratio;
         atk = dungeonAtk * ratio;
         aspd = dungeonASPD * ratio;

@@ -4,18 +4,21 @@ using TMPro;
 
 public class MonsterIcon : MonoBehaviour
 {
-    public MonsterItem item;
     [SerializeField] private Image iconImage;
     [SerializeField] private TextMeshProUGUI nameText;
 
-    public void Setup(MonsterItem item)
+    private MonsterItem item;
+
+    public void SetMonsterItem(MonsterItem newItem)
     {
-        this.item = item;
-        
-        if (iconImage != null)
+        item = newItem;
+
+        if (iconImage != null && item.monsterIcon != null)
             iconImage.sprite = item.monsterIcon;
 
         if (nameText != null)
             nameText.text = item.monsterName;
     }
+
+    // 여기에 드래그 & 삭제 관련 기능 추가할 예정
 }

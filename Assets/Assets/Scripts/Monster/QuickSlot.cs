@@ -17,6 +17,7 @@ public class QuickSlot : MonoBehaviour, IDropHandler
 
     public void OnDrop(PointerEventData eventData)
     {
+        Debug.Log("✅ OnDrop 호출됨");
         // 드래그된 오브젝트에서 MonsterSlot 컴포넌트 가져오기
         MonsterSlot draggedSlot = eventData.pointerDrag?.GetComponent<MonsterSlot>();
         if (draggedSlot == null) return;
@@ -33,7 +34,9 @@ public class QuickSlot : MonoBehaviour, IDropHandler
 
         // 몬스터 프리팹 Instantiate (실제 생성)
         GameObject monsterObj = Instantiate(item.monsterPrefab, summonPosition.position, Quaternion.identity);
-
+        Debug.Log("📦 소환됨 오브젝트: " + monsterObj.name);
+        Debug.Log("🧩 프리팹 이름: " + item.monsterPrefab.name);
+        monsterObj.transform.SetParent(null);
         // 능력치 가져오기
         float hp = statsManager.GetStatValue("HP");
         float atk = statsManager.GetStatValue("ATK");
