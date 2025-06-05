@@ -19,6 +19,8 @@ public class BossSkillManager : MonoBehaviour
     public TMP_Text selectedSkillNameText;
 
     private SkillUI selectedSkillUI;
+    private SkillDatabase skillDatabase;
+
 
     private void Start()
     {
@@ -31,7 +33,7 @@ public class BossSkillManager : MonoBehaviour
 
     public void DrawSkill()
     {
-        if (allSkillData == null || allSkillData.Count == 0)
+        if (skillDatabase.allSkillData == null || skillDatabase.allSkillData.Count == 0)
         {
             Debug.LogError("스킬 데이터가 존재하지 않습니다.");
             return;
@@ -43,7 +45,7 @@ public class BossSkillManager : MonoBehaviour
             return;
         }
 
-        SkillData randomData = allSkillData[Random.Range(0, allSkillData.Count)];
+        SkillData randomData = skillDatabase.allSkillData[Random.Range(0, skillDatabase.allSkillData.Count)];
         BossSkill newSkill = new BossSkill(randomData);
 
         GameObject go = Instantiate(skillSlotPrefab, skillSlotParent);
