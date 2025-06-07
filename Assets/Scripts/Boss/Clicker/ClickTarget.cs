@@ -1,6 +1,7 @@
 using UnityEngine;
+using UnityEngine.EventSystems;
 
-public class ClickTarget : MonoBehaviour
+public class ClickTarget : MonoBehaviour, IPointerClickHandler
 {
     private MiniGameController controller;
     private bool isGood;
@@ -8,10 +9,11 @@ public class ClickTarget : MonoBehaviour
     public void Init(MiniGameController ctrl)
     {
         controller = ctrl;
-        isGood = gameObject.tag == "good";
+        isGood = gameObject.tag == "Good"; // 태그 확인
     }
 
-    private void OnMouseDown()
+    // UI 클릭 이벤트
+    public void OnPointerClick(PointerEventData eventData)
     {
         if (isGood)
         {
@@ -19,8 +21,9 @@ public class ClickTarget : MonoBehaviour
         }
         else
         {
-            // 실패 시 효과 등
+            controller.EndGame(false);
         }
+
         Destroy(gameObject);
     }
 }

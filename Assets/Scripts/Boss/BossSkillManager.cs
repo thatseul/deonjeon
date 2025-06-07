@@ -24,6 +24,7 @@ public class BossSkillManager : MonoBehaviour
 
     private void Start()
     {
+        skillDatabase = FindObjectOfType<SkillDatabase>();
         drawSkillButton.onClick.AddListener(DrawSkill);
         upgradeSkillButton.onClick.AddListener(OnUpgradeButtonClicked);
 

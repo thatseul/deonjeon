@@ -1,4 +1,3 @@
-// BossSkill.cs (수정본)
 using UnityEngine;
 
 [System.Serializable]

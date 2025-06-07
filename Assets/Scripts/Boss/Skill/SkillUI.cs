@@ -70,7 +70,6 @@ public class SkillUI : MonoBehaviour, IPointerClickHandler
         upgradeButton.onClick.RemoveAllListeners();
 
         SetSelected(false); // 선택 해제
-        gameObject.SetActive(false);
     }
 
     /// <summary>
