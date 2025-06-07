@@ -1,4 +1,5 @@
 using UnityEngine;
+using UnityEngine.UI;
 
 /// <summary>
 /// 플레이어가 조작하는 던전 본체. 체력과 공격력을 DungeonStatsManager에서 가져와 사용합니다.
@@ -8,6 +9,7 @@ public class Dungeon : MonoBehaviour
     [Header("스탯 관리자")]
     [Tooltip("Dungeon의 능력치를 관리하는 스크립트입니다.")]
     [SerializeField] private DungeonStatsManager statsManager;
+    [SerializeField] private Slider hpBar;
 
     public float AttackSpeed => statsManager.GetStatValue("ASPD");
 
@@ -17,6 +19,12 @@ public class Dungeon : MonoBehaviour
     private void Start()
     {
         currentHp = MaxHp;
+
+        if (hpBar != null)
+        {
+            hpBar.maxValue = MaxHp;
+            hpBar.value = MaxHp;
+        }
     }
 
     public float MaxHp => statsManager.GetStatValue("HP");
@@ -34,12 +42,16 @@ public class Dungeon : MonoBehaviour
         }
 
         currentHp -= damage;
+        if (currentHp < 0) currentHp = 0;
+
+        if (hpBar != null)
+            hpBar.value = currentHp;
+
         Debug.Log($"💢 데미지 {damage} 입음! 현재 HP: {currentHp}/{MaxHp}");
 
         if (currentHp <= 0)
         {
             isDead = true;
-            currentHp = 0;
             Debug.Log("☠️ Dungeon 사망! 초기화 예정");
             Invoke(nameof(ResetDungeonState), 1f);
         }
@@ -70,6 +82,6 @@ public class Dungeon : MonoBehaviour
         // TODO: 리셋 시 페이드 연출 추가 예정
     }
 
-    // 공격력을 직접 증가시키는 방식은 제거됨
+    // 공격력을 직접 증가시키는 방식은 제거
     // 모든 스탯은 DungeonStatsManager에서 관리
 }

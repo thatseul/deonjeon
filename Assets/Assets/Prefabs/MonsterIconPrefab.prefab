@@ -12,6 +12,7 @@ GameObject:
   - component: {fileID: 7576228902976719138}
   - component: {fileID: 5636017984418139284}
   - component: {fileID: 5157520684252196147}
+  - component: {fileID: -5815005402777672926}
   m_Layer: 5
   m_Name: MonsterIconPrefab
   m_TagString: Untagged
@@ -78,6 +79,19 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a4531e4d00d585e4cae750dac419b2cb, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+--- !u!114 &-5815005402777672926
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3273166095094507123}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c63594a13e1c0054aa0d6747f5ce92d1, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  monsterIcon: {fileID: 202694560861227063}
 --- !u!1 &5694030519079744176
 GameObject:
   m_ObjectHideFlags: 0

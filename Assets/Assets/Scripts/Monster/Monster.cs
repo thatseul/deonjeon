@@ -11,12 +11,18 @@ public class Monster : MonoBehaviour
     [SerializeField] private float atk;
     [SerializeField] private float aspd;
 
+    public float Atk => atk;
+    public float Aspd => aspd;
+    public bool IsAlive() => !isDead;
+
+    private bool isDead = false;
+    private QuickSlot quickSlotOwner; // ✅ 연결된 슬롯 기억
+
     /// <summary>
     /// 몬스터 능력치 초기화 (던전 능력치 * 비율)
     /// </summary>
     public void Init(float dungeonHp, float dungeonAtk, float dungeonASPD, float ratio)
     {
-        Debug.Log($"🐲 Init 호출됨: HP={hp}, ATK={atk}, ASPD={aspd}, SCALE={ratio}");
         hp = dungeonHp * ratio;
         atk = dungeonAtk * ratio;
         aspd = dungeonASPD * ratio;
@@ -24,5 +30,29 @@ public class Monster : MonoBehaviour
         Debug.Log($"🐲 몬스터 능력치 초기화 완료: HP={hp}, ATK={atk}, SPD={aspd}");
     }
 
-    // 이후 공격, 이동 등 행동은 여기에 추가
+    public void TakeDamage(float damage)
+    {
+        hp -= damage;
+        Debug.Log($"🩸 [{gameObject.name}] 데미지 {damage} ▶ 현재 HP: {hp}");
+
+        if (hp <= 0)
+        {
+            Die();
+        }
+    }
+
+    private void Die()
+    {
+        isDead = true;
+
+        // ✅ 퀵슬롯에 알림
+        quickSlotOwner?.ClearSlot();
+
+        Destroy(gameObject);
+    }
+
+    public void SetQuickSlotOwner(QuickSlot slot)
+    {
+        quickSlotOwner = slot;
+    }
 }

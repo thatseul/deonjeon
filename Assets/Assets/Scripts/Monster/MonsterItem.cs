@@ -8,5 +8,8 @@ public class MonsterItem : ScriptableObject
     public Sprite monsterIcon;
     public GameObject monsterPrefab;
     public int cost;
-    public float statScaleRatio; //몬스터별 능력치 반영 비율 다르게
+    public float statScaleRatio;
+
+    [Range(0f, 100f)]
+    public float probability; // 뽑기 확률 (0~100%)
 }

@@ -32,6 +32,7 @@ public class Hero : MonoBehaviour
         }
     }
 
+
     private void OnTriggerEnter2D(Collider2D other)
     {
         if (other.CompareTag("Hero") || currentHp <= 0) return;
@@ -41,6 +42,9 @@ public class Hero : MonoBehaviour
 
         if (other.CompareTag("Monster"))
         {
+            Monster monster = other.GetComponent<Monster>();
+            if (monster != null)
+                StartCoroutine(FightWithMonster(monster));
             return;
         }
 
@@ -51,6 +55,32 @@ public class Hero : MonoBehaviour
         }
     }
 
+    private IEnumerator FightWithMonster(Monster monster)
+    {
+        float heroAttackInterval = 1f;
+
+        while (currentHp > 0 && monster != null && monster.IsAlive())
+        {
+            yield return new WaitForSeconds(heroAttackInterval);
+
+            // 🔐 안전한 접근: Destroy 되었는지 확인
+            if (monster == null || !monster.gameObject) yield break;
+
+            monster.TakeDamage(attackPowerPerSecond);
+            currentHp -= monster.Atk;
+
+            if (!monster.IsAlive())
+            {
+                yield break;
+            }
+
+            if (currentHp <= 0)
+            {
+                Die();
+                yield break;
+            }
+        }
+    }
     private IEnumerator FightLoop()
     {
         while (currentHp > 0)
@@ -75,17 +105,20 @@ public class Hero : MonoBehaviour
 
             if (currentHp <= 0)
             {
-                isDead = true;
-                rb.linearVelocity = Vector2.zero;
-                StopCombat();
-                GoldManager.Instance?.AddGold();
-                spawner?.OnHeroDeath(gameObject);
-                Destroy(gameObject);
+                Die();
                 yield break;
             }
         }
     }
-
+    private void Die()
+    {
+        isDead = true;
+        rb.linearVelocity = Vector2.zero;
+        StopCombat();
+        GoldManager.Instance?.AddGold();
+        spawner?.OnHeroDeath(gameObject);
+        Destroy(gameObject);
+    }
     private void OnTriggerExit2D(Collider2D other)
     {
         if (other.CompareTag("Hero")) return;

@@ -17,3 +17,4 @@ MonoBehaviour:
   monsterPrefab: {fileID: 334036454642833225, guid: 6d0bcacc4d9d0e74a983151daa1abf5e, type: 3}
   cost: 1
   statScaleRatio: 0.1
+  probability: 50

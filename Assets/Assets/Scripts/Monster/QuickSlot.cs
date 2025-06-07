@@ -1,65 +1,106 @@
 using UnityEngine;
-using UnityEngine.EventSystems;
 using UnityEngine.UI;
+using UnityEngine.EventSystems;
 
-public class QuickSlot : MonoBehaviour, IDropHandler
+public class QuickSlot : MonoBehaviour, IDropHandler, IPointerClickHandler
 {
     [Header("몬스터 소환 위치")]
-    [Tooltip("실제로 몬스터가 소환될 월드 위치 오브젝트")]
     [SerializeField] private Transform summonPosition;
 
     [Header("던전 능력치 매니저")]
-    [Tooltip("DungeonStatsManager 참조")]
     [SerializeField] private DungeonStatsManager statsManager;
 
-    [Header("UI 이미지 표시용")]
+    [Header("퀵슬롯 이미지")]
     [SerializeField] private Image slotImage;
+
+    [Header("선택 UI")]
+    [Tooltip("빨간 테두리용 UI 오브젝트")]
+    [SerializeField] private GameObject slotHighlight;
+
+    [Tooltip("퀵슬롯 매니저")]
+    [SerializeField] private DungeonSlotManager dungeonSlotManager;
+
+    private GameObject summonedMonster;
+
+    private void Start()
+    {
+        if (slotHighlight != null)
+            slotHighlight.SetActive(false); // 처음엔 숨김
+    }
 
     public void OnDrop(PointerEventData eventData)
     {
-        Debug.Log("✅ OnDrop 호출됨");
-        // 드래그된 오브젝트에서 MonsterSlot 컴포넌트 가져오기
-        MonsterSlot draggedSlot = eventData.pointerDrag?.GetComponent<MonsterSlot>();
+        var draggedSlot = eventData.pointerDrag?.GetComponent<MonsterSlot>();
         if (draggedSlot == null) return;
 
-        Debug.Log("🔍 소환 위치: " + summonPosition.position);
-
-        // 해당 슬롯에 있는 몬스터 정보 가져오기
         MonsterItem item = draggedSlot.GetAssignedMonster();
-        if (item == null || item.monsterPrefab == null)
-        {
-            Debug.LogWarning("❌ 소환 실패: 몬스터 정보 또는 프리팹이 비어 있음");
-            return;
-        }
+        if (item == null || item.monsterPrefab == null) return;
 
-        // 몬스터 프리팹 Instantiate (실제 생성)
-        GameObject monsterObj = Instantiate(item.monsterPrefab, summonPosition.position, Quaternion.identity);
-        Debug.Log("📦 소환됨 오브젝트: " + monsterObj.name);
-        Debug.Log("🧩 프리팹 이름: " + item.monsterPrefab.name);
-        monsterObj.transform.SetParent(null);
-        // 능력치 가져오기
-        float hp = statsManager.GetStatValue("HP");
-        float atk = statsManager.GetStatValue("ATK");
-        float aspd = statsManager.GetStatValue("ASPD");
+        summonedMonster = Instantiate(item.monsterPrefab, summonPosition.position, Quaternion.identity);
+        Monster monster = summonedMonster.GetComponent<Monster>();
 
-        // 능력치 비율 적용
-        Monster monster = monsterObj.GetComponent<Monster>();
         if (monster != null)
         {
+            float hp = statsManager.GetStatValue("HP");
+            float atk = statsManager.GetStatValue("ATK");
+            float aspd = statsManager.GetStatValue("ASPD");
             monster.Init(hp, atk, aspd, item.statScaleRatio);
-            Debug.Log($"✅ {item.monsterName} 소환 완료! 능력치 비율: {item.statScaleRatio * 100}%");
-        }
-        else
-        {
-            Debug.LogWarning("⚠️ Monster.cs 컴포넌트가 프리팹에 없음!");
+
+            // ✅ 몬스터에 슬롯 연결
+            monster.SetQuickSlotOwner(this);
         }
 
-        // UI 이미지 표시
         if (slotImage != null)
         {
-            slotImage.sprite = item.monsterIcon; // MonsterItem 안에 Sprite 아이콘이 있어야 함
-            slotImage.color = Color.white;       // 혹시 투명할 수도 있어서 색상 흰색
+            slotImage.sprite = item.monsterIcon;
+            slotImage.color = Color.white;
         }
 
+        draggedSlot.ClearSlot();
+    }
+
+    public void OnPointerClick(PointerEventData eventData)
+    {
+        if (slotHighlight != null)
+            slotHighlight.SetActive(true);
+
+        dungeonSlotManager.SelectSlot(this);
+    }
+
+    public void DeleteMonster()
+    {
+        if (summonedMonster != null)
+        {
+            Destroy(summonedMonster);
+            summonedMonster = null;
+        }
+
+        ClearSlot();
+    }
+
+    public void ClearSlot()
+    {
+        summonedMonster = null;
+
+        if (slotImage != null)
+        {
+            slotImage.sprite = null;
+            slotImage.color = new Color(1, 1, 1, 0); // 완전 투명
+        }
+
+        Deselect();
+        Debug.Log("🧼 슬롯 클리어됨");
+    }
+
+    public void Highlight()
+    {
+        if (slotHighlight != null)
+            slotHighlight.SetActive(true);
+    }
+
+    public void Deselect()
+    {
+        if (slotHighlight != null)
+            slotHighlight.SetActive(false);
     }
 }

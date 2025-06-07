@@ -15,5 +15,6 @@ MonoBehaviour:
   monsterName: "\uC6A9"
   monsterIcon: {fileID: 21300000, guid: d517ae47e75350f428e2ec9d6f5eb6ea, type: 3}
   monsterPrefab: {fileID: 4495984263289292171, guid: 0a1ad2a8f41ccf8499295d8c3701af96, type: 3}
-  cost: 3
-  statScaleRatio: 0.3
+  cost: 10
+  statScaleRatio: 0.5
+  probability: 15
