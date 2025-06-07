@@ -113,7 +113,6 @@ public class MiniGameController : MonoBehaviour
         }
         clickTarget.Init(this);
 
-        // 1.5초 후에 타겟이 자동 삭제되도록 (클릭 안하면 사라지게)
         Destroy(obj, 2f);
     }
 
