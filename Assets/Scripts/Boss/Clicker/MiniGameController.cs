@@ -20,6 +20,7 @@ public class MiniGameController : MonoBehaviour
     private BossSkill currentSkill;
     private SkillUI linkedUI;
     private Coroutine gameCoroutine;
+    private bool roundCleared = false;
 
     public void StartMiniGame(BossSkill skill, SkillUI ui = null)
     {
@@ -34,8 +35,6 @@ public class MiniGameController : MonoBehaviour
 
         gameCoroutine = StartCoroutine(RunRound());
     }
-
-   private bool roundCleared = false;  // 라운드 성공 여부 상태 변수
 
     IEnumerator RunRound()
     {
@@ -57,7 +56,7 @@ public class MiniGameController : MonoBehaviour
                 yield return new WaitForSeconds(1f);
                 timer -= 1f;
 
-                if (roundCleared)  // 점수 달성했으면 즉시 종료
+                if (roundCleared)
                     break;
             }
 
@@ -65,7 +64,6 @@ public class MiniGameController : MonoBehaviour
 
             if (roundCleared)
             {
-                currentSkill.LevelUp(currentDungeonLevel);
                 round++;
             }
             else
@@ -75,8 +73,10 @@ public class MiniGameController : MonoBehaviour
             }
         }
 
-        EndGame(true);
+    currentSkill.LevelUp(currentDungeonLevel);
+    EndGame(true);
     }
+
 
     void SpawnTargets()
     {
@@ -94,36 +94,50 @@ public class MiniGameController : MonoBehaviour
             return;
         }
 
-        GameObject obj = Instantiate(prefab, spawnArea);
+        GameObject obj = Instantiate(prefab);
         RectTransform objRect = obj.GetComponent<RectTransform>();
         if (objRect == null)
         {
-            Debug.LogError("Prefab에 RectTransform 컴포넌트가 없습니다.");
+            Debug.LogError("Prefab에 RectTransform이 없습니다.");
             return;
         }
 
-        Vector2 randomPos = GetRandomPositionInRect(spawnRect);
+        // 부모 설정 후 사이즈, 좌표 보정
+        obj.transform.SetParent(spawnRect, false); 
+
+        objRect.anchorMin = new Vector2(0.5f, 0.5f);
+        objRect.anchorMax = new Vector2(0.5f, 0.5f);
+        objRect.pivot = new Vector2(0.5f, 0.5f);
+
+        Vector2 randomPos = GetRandomPositionInRect(spawnRect, objRect);
         objRect.anchoredPosition = randomPos;
 
         var clickTarget = obj.GetComponent<ClickTarget>();
-        if (clickTarget == null)
+        if (clickTarget != null)
         {
-            Debug.LogError("ClickTarget 컴포넌트가 없습니다.");
-            return;
+            clickTarget.Init(this);
         }
-        clickTarget.Init(this);
+        else
+        {
+            Debug.LogWarning("ClickTarget 컴포넌트가 없습니다.");
+        }
 
         Destroy(obj, 2f);
     }
 
-    Vector2 GetRandomPositionInRect(RectTransform rectTransform)
+    Vector2 GetRandomPositionInRect(RectTransform parentRect, RectTransform targetRect)
     {
-        Vector2 size = rectTransform.rect.size;
-        float x = Random.Range(-size.x / 2f, size.x / 2f);
-        float y = Random.Range(-size.y / 2f, size.y / 2f);
+        Vector2 parentSize = parentRect.rect.size;
+        Vector2 targetSize = targetRect.rect.size;
+
+        float xRange = (parentSize.x - targetSize.x) / 2f;
+        float yRange = (parentSize.y - targetSize.y) / 2f;
+
+        float x = Random.Range(-xRange, xRange);
+        float y = Random.Range(-yRange, yRange);
+
         return new Vector2(x, y);
     }
-
 
     void ClearTargets()
     {
@@ -140,7 +154,7 @@ public class MiniGameController : MonoBehaviour
 
         if (score >= successPerRound)
         {
-            roundCleared = true;  // 성공 플래그 켜서 다음 라운드 준비
+            roundCleared = true;
         }
     }
 
@@ -161,7 +175,7 @@ public class MiniGameController : MonoBehaviour
 
         resultPanel.SetActive(true);
         resultText.text = isSuccess
-            ? $"Skill success: {currentSkill.level}"
+            ? $"Success: {currentSkill.level}"
             : "fail";
     }
 }

@@ -8,7 +8,9 @@ public class BossSkill
     public float baseCooldown;
     public float baseRange;
     public SkillGrade grade;
+    public SkillData data;
     public int level;
+    
 
     public BossSkill(string skillName, float baseAttack, float baseCooldown, float baseRange, SkillGrade grade)
     {
@@ -49,8 +51,11 @@ public class BossSkill
     public void LevelUp(int dungeonLevel)
     {
         int maxLevel = GetMaxLevel(dungeonLevel);
-        if (level < maxLevel)
-            level++;
+        if (level >= maxLevel) return;
+
+        int maxIncrease = maxLevel - level;
+        int increase = Random.Range(1, maxIncrease + 1);
+        level += increase;
     }
 
     private int GetMaxLevel(int dungeonLevel)

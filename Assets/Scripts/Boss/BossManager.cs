@@ -1,15 +1,28 @@
 using UnityEngine;
+using UnityEngine.UI;
 using TMPro;
 
 public class BossManager : MonoBehaviour
 {
+    public Button upgradeButton;
+
     [Header("Boss Data")]
-    public BossData bossData; // 인스펙터에서 ScriptableObject 할당
+    public BossData bossData;
 
     [Header("UI")]
     public TextMeshProUGUI statsText;
     public TextMeshProUGUI resultText;
     public int upgradeCost = 100;
+
+    private void Start()
+    {
+        UpdateStatsUI();
+
+        if (upgradeButton != null)
+        {
+            upgradeButton.onClick.AddListener(TryUpgrade);
+        }
+    }
 
     public void TryUpgrade()
     {
@@ -34,11 +47,6 @@ public class BossManager : MonoBehaviour
 
         resultText.text = $"{type} {result} ({value})";
 
-        UpdateStatsUI();
-    }
-
-    private void Start()
-    {
         UpdateStatsUI();
     }
 

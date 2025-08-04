@@ -7,28 +7,25 @@ public class BossSkillManager : MonoBehaviour
 {
     [Header("Skill Setup")]
     public List<SkillData> allSkillData;
-    public GameObject skillSlotPrefab;          // 슬롯 프리팹
-    public Transform skillSlotParent;           // HorizontalLayoutGroup 부모
+    public GameObject skillSlotPrefab;
+    public Transform skillSlotParent;
 
-    private List<SkillUI> skillSlotList = new(); // 생성된 슬롯 목록
+    private List<SkillUI> skillSlotList = new();
     private const int maxSkillCount = 5;
 
     [Header("UI")]
     public Button drawSkillButton;
-    public Button upgradeSkillButton;
     public TMP_Text selectedSkillNameText;
 
     private SkillUI selectedSkillUI;
     private SkillDatabase skillDatabase;
 
-
     private void Start()
     {
         skillDatabase = FindObjectOfType<SkillDatabase>();
         drawSkillButton.onClick.AddListener(DrawSkill);
-        upgradeSkillButton.onClick.AddListener(OnUpgradeButtonClicked);
 
-        selectedSkillUI = null; // 강제로 초기화
+        selectedSkillUI = null;
         UpdateButtonStates();
     }
 
@@ -57,7 +54,6 @@ public class BossSkillManager : MonoBehaviour
         UpdateButtonStates();
     }
 
-
     public void RemoveSkill(SkillUI skillUI)
     {
         if (skillUI == null) return;
@@ -68,7 +64,7 @@ public class BossSkillManager : MonoBehaviour
         if (selectedSkillUI == skillUI)
         {
             selectedSkillUI = null;
-            selectedSkillNameText.text = "선택된 스킬 없음";
+            selectedSkillNameText.text = "empty";
         }
 
         UpdateButtonStates();
@@ -83,45 +79,29 @@ public class BossSkillManager : MonoBehaviour
 
         if (skillUI != null && skillUI.GetBossSkill() != null)
         {
-            selectedSkillNameText.text = $"선택된 스킬: {skillUI.GetBossSkill().skillName}";
+            selectedSkillNameText.text = $"skill: {skillUI.GetBossSkill().skillName}";
             skillUI.SetSelected(true);
         }
         else
         {
-            selectedSkillNameText.text = "선택된 스킬 없음";
+            selectedSkillNameText.text = "empty";
         }
 
         UpdateButtonStates();
     }
 
-    public void OnUpgradeButtonClicked()
+    public void StartMiniGameForUpgrade(BossSkill skill, SkillUI skillUI)
     {
-        if (selectedSkillUI == null)
-        {
-            Debug.Log("강화할 스킬을 먼저 선택하세요.");
-            return;
-        }
-        OnUpgradeButtonClicked(selectedSkillUI.GetBossSkill(), selectedSkillUI);
-
-    }
-    public void OnUpgradeButtonClicked(BossSkill skill, SkillUI skillUI)
-    {
-        if (selectedSkillUI == null)
-        {
-            Debug.Log("강화할 스킬을 먼저 선택하세요.");
-            return;
-        }
 
         MiniGameController miniGame = FindFirstObjectByType<MiniGameController>();
         if (miniGame != null)
         {
-            miniGame.StartMiniGame(selectedSkillUI.GetBossSkill(), selectedSkillUI);
+            miniGame.StartMiniGame(skill, skillUI);
         }
     }
 
     private void UpdateButtonStates()
     {
         drawSkillButton.interactable = skillSlotList.Count < maxSkillCount;
-        upgradeSkillButton.interactable = selectedSkillUI != null;
     }
 }

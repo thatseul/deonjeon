@@ -15,10 +15,7 @@ public class SkillUI : MonoBehaviour, IPointerClickHandler
     private BossSkill bossSkill;
     private BossSkillManager skillManager;
 
-    /// <summary>
-    /// BossSkill 데이터와 매니저 연결
-    /// </summary>
-    public void SetBossSkill(BossSkill skill, BossSkillManager manager)
+   public void SetBossSkill(BossSkill skill, BossSkillManager manager)
     {
         bossSkill = skill;
         skillManager = manager;
@@ -32,14 +29,17 @@ public class SkillUI : MonoBehaviour, IPointerClickHandler
         });
 
         upgradeButton.onClick.RemoveAllListeners();
-        upgradeButton.onClick.AddListener(() => skillManager.OnUpgradeButtonClicked(skill, this));
+        upgradeButton.onClick.AddListener(() =>
+        {
+            skillManager.StartMiniGameForUpgrade(bossSkill, this);
+        });
+
+        upgradeButton.interactable = false;
 
         gameObject.SetActive(true);
     }
 
-    /// <summary>
-    /// UI 요소 갱신
-    /// </summary>
+
     public void RefreshUI()
     {
         if (bossSkill == null)
@@ -49,15 +49,12 @@ public class SkillUI : MonoBehaviour, IPointerClickHandler
         }
 
         skillNameText.text = bossSkill.skillName;
-        levelText.text = $"Lv. {bossSkill.level}";
-        statText.text = $"공격 {bossSkill.GetFinalAttack():F1}, 쿨 {bossSkill.GetFinalCooldown():F1}, 범위 {bossSkill.GetFinalRange():F1}";
+        levelText.text = $"Lv. {bossSkill.level}, Grade. {bossSkill.grade}";
+        statText.text = $"atk {bossSkill.GetFinalAttack():F1}, cool {bossSkill.GetFinalCooldown():F1}, range {bossSkill.GetFinalRange():F1}";
 
-        gameObject.SetActive(true); // 혹시 비활성화되어 있다면 다시 활성화
+        gameObject.SetActive(true);
     }
 
-    /// <summary>
-    /// 슬롯 비우기
-    /// </summary>
     public void Clear()
     {
         bossSkill = null;
@@ -69,20 +66,14 @@ public class SkillUI : MonoBehaviour, IPointerClickHandler
         deleteButton.onClick.RemoveAllListeners();
         upgradeButton.onClick.RemoveAllListeners();
 
-        SetSelected(false); // 선택 해제
+        SetSelected(false);
     }
 
-    /// <summary>
-    /// 현재 슬롯이 보유한 스킬 반환
-    /// </summary>
     public BossSkill GetBossSkill()
     {
         return bossSkill;
     }
 
-    /// <summary>
-    /// 슬롯 클릭 시 선택 처리
-    /// </summary>
     public void OnPointerClick(PointerEventData eventData)
     {
         if (skillManager != null)
@@ -91,15 +82,17 @@ public class SkillUI : MonoBehaviour, IPointerClickHandler
         }
     }
 
-    /// <summary>
-    /// 선택 시 배경 색상 등 UI 강조 처리
-    /// </summary>
     public void SetSelected(bool selected)
     {
         Image image = GetComponent<Image>();
         if (image != null)
         {
-            image.color = selected ? new Color(1f, 0.92f, 0.6f) : Color.white; // 연노랑 강조
+            image.color = selected ? new Color(1f, 0.92f, 0.6f) : Color.white;
+        }
+
+        if (upgradeButton != null)
+        {
+            upgradeButton.interactable = selected;
         }
     }
 }
