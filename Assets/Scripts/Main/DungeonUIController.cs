@@ -1,67 +1,84 @@
 using UnityEngine;
 using TMPro;
 
-/// <summary>
-/// UI 버튼을 통해 던전의 능력치를 강화하는 기능을 담당.
-/// </summary>
 public class DungeonUIController : MonoBehaviour
 {
     [Header("UI 요소")]
-    [Tooltip("현재 골드를 표시하는 TextMeshProUGUI")]
     [SerializeField] private TextMeshProUGUI goldText;
 
-    [Tooltip("던전 능력치 매니저")]
+    [Header("던전 능력치 매니저")]
     [SerializeField] private DungeonStatsManager statsManager;
 
-    private void Start() 
+    [Header("업그레이드 비용")]
+    [SerializeField] private int atkCost  = 1;
+    [SerializeField] private int hpCost   = 1;
+    [SerializeField] private int aspdCost = 1;
+
+    private void Start()
     {
         UpdateGoldUI();
     }
 
-    /// 공격력 업그레이드 버튼에 연결될 함수
+    private void Update()
+    {
+        // 간단히 매 프레임 갱신(원하면 이벤트 방식으로 바꿔도 됨)
+        UpdateGoldUI();
+    }
+
+    // 공격력 업그레이드 버튼
     public void OnClickIncreaseAttack()
     {
-        if (GoldManager.Instance.GetCurrentGold() > 0)
+        if (GameState.I == null || statsManager == null) return;
+
+        if (GameState.I.TrySpend(atkCost))
         {
             Debug.Log("💥 공격력 증가 버튼 클릭됨!");
             statsManager.UpgradeStat("ATK");
-            GoldManager.Instance.SpendGold(1);
             UpdateGoldUI();
+        }
+        else
+        {
+            Debug.Log("❌ 골드 부족!");
         }
     }
 
-    /// 체력 업그레이드 버튼에 연결될 함수
+    // 체력 업그레이드 버튼
     public void OnClickIncreaseHp()
     {
-        if (GoldManager.Instance.GetCurrentGold() > 0)
+        if (GameState.I == null || statsManager == null) return;
+
+        if (GameState.I.TrySpend(hpCost))
         {
             Debug.Log("❤️ 체력 증가 버튼 클릭됨!");
             statsManager.UpgradeStat("HP");
-            GoldManager.Instance.SpendGold(1);
             UpdateGoldUI();
         }
+        else
+        {
+            Debug.Log("❌ 골드 부족!");
+        }
     }
 
-    //공속
+    // 공속 업그레이드 버튼
     public void OnClickIncreaseSpeed()
-{
-    if (GoldManager.Instance.GetCurrentGold() > 0)
     {
-        Debug.Log("⚡공속 증가 버튼 클릭됨!");
-        statsManager.UpgradeStat("ASPD");
-        GoldManager.Instance.SpendGold(1);
-        UpdateGoldUI();
-    }
-}
+        if (GameState.I == null || statsManager == null) return;
 
-    /// <summary>
-    /// 현재 골드 값을 UI에 반영
-    /// </summary>
+        if (GameState.I.TrySpend(aspdCost))
+        {
+            Debug.Log("⚡ 공속 증가 버튼 클릭됨!");
+            statsManager.UpgradeStat("ASPD");
+            UpdateGoldUI();
+        }
+        else
+        {
+            Debug.Log("❌ 골드 부족!");
+        }
+    }
+
     private void UpdateGoldUI()
     {
-        if (goldText != null)
-        {
-            goldText.text = $"Gold: {GoldManager.Instance.GetCurrentGold()}";
-        }
+        if (goldText && GameState.I != null)
+            goldText.text = $"Gold: {Mathf.FloorToInt((float)GameState.I.Gold)}";
     }
 }

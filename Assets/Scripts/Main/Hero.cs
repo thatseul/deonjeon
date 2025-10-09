@@ -5,6 +5,7 @@ public class Hero : MonoBehaviour
 {
     [SerializeField] private float moveSpeed = 2f;
     [SerializeField] private int attackPowerPerSecond = 1;
+    [SerializeField] private int goldReward = 10;
 
     private int maxHp;
     private float currentHp;
@@ -115,7 +116,7 @@ public class Hero : MonoBehaviour
         isDead = true;
         rb.linearVelocity = Vector2.zero;
         StopCombat();
-        GoldManager.Instance?.AddGold();
+        if (GameState.I != null) GameState.I.AddGold(goldReward);
         spawner?.OnHeroDeath(gameObject);
         Destroy(gameObject);
     }

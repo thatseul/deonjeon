@@ -18,44 +18,52 @@ public class MonsterBuyButton : MonoBehaviour
     [Header("인벤토리 관리")]
     [SerializeField] private MonsterInventoryManager inventoryManager;
 
+    [Header("밸런스")]
+    [SerializeField] private int cost = 10; // ✅ 인스펙터에서 조절 가능
+
     private void Start()
     {
         if (buyButton != null)
         {
-            buyButton.onClick.RemoveAllListeners(); // ✅ 기존 리스너 제거
+            buyButton.onClick.RemoveAllListeners();
             buyButton.onClick.AddListener(OnClickBuy);
         }
     }
+
     public void OnClickBuy()
     {
-        const int cost = 10; // ✅ 고정 비용 사용
+        // ✅ GameState 사용으로 통일
+        if (GameState.I == null)
+        {
+            Debug.LogWarning("GameState 없음: 구매 불가");
+            return;
+        }
 
-        if (!GoldManager.Instance.SpendGold(cost))
+        if (!GameState.I.TrySpend(cost))
         {
             Debug.Log("❌ 골드 부족!");
             return;
         }
 
-        MonsterItem selectedItem = poolManager.GetRandomMonsterItem();
-
+        var selectedItem = poolManager ? poolManager.GetRandomMonsterItem() : null;
         if (selectedItem == null)
         {
             Debug.LogWarning("❗ 몬스터 뽑기 실패");
+            // 실패 시 골드 환불할 거면 아래 주석 해제
+            // GameState.I.AddGold(cost);
             return;
         }
 
-        // 아이템을 인벤토리에 추가하고 UI 생성
-        inventoryManager.AddMonsterToInventory(selectedItem);
+        // 인벤토리 등록 + 아이콘 생성
+        if (inventoryManager) inventoryManager.AddMonsterToInventory(selectedItem);
 
-        GameObject icon = Instantiate(monsterIconPrefab, monsterInvenPanel);
+        var icon = Instantiate(monsterIconPrefab, monsterInvenPanel);
         icon.GetComponent<MonsterIcon>()?.SetMonsterItem(selectedItem);
 
-        MonsterSlot slot = icon.GetComponent<MonsterSlot>();
-        if (slot != null)
-        {
-            slot.SetMonster(selectedItem);
-        }
+        var slot = icon.GetComponent<MonsterSlot>();
+        if (slot != null) slot.SetMonster(selectedItem);
 
+        // 패널 안 랜덤 배치
         Vector2 size = monsterInvenPanel.rect.size;
         float x = Random.Range(padding, size.x - padding);
         float y = Random.Range(padding, size.y - padding);
@@ -63,5 +71,4 @@ public class MonsterBuyButton : MonoBehaviour
 
         Debug.Log($"🎁 '{selectedItem.monsterName}' 소환됨 (Cost: {cost})");
     }
-
 }
