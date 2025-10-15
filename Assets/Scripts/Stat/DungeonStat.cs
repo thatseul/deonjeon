@@ -13,26 +13,23 @@ public class DungeonStat
     [Tooltip("기본 수치")]
     public float baseValue;
 
+    [Header("업그레이드 비용 설정")]
+    public int baseCost = 1;         // 스탯별 시작 가격
+    public float costMultiplier = 1.5f; // 레벨업마다 가격 배수
+
     public float CurrentValue
-{
-    get
     {
-        if (name == "ASPD")
+        get
         {
-            float aspd = baseValue;
-
-            for (int i = 0; i < upgradeLevel; i++)
+            if (name == "ASPD")
             {
-                aspd *= 1.02f; // 1.02배씩 곱해서 점점 빨라짐
+                float aspd = baseValue;
+                for (int i = 0; i < upgradeLevel; i++) aspd *= 1.02f;
+                return Mathf.Min(aspd, 3f);
             }
-
-            return Mathf.Min(aspd, 3f); // 최대 3까지 제한
+            return baseValue * (1 + 0.2f * upgradeLevel);
         }
-
-        // HP, ATK 등 나머지는 기존 계산식 유지
-        return baseValue * (1 + 0.2f * upgradeLevel);
     }
-}
 
     public DungeonStat(string name, float baseValue)
     {
@@ -46,12 +43,27 @@ public class DungeonStat
         upgradeLevel++;
     }
 
-    /// <summary>
-    /// 현재 업그레이드 비용 계산 함수
-    /// </summary>
+    /// <summary>현재 업그레이드 비용 = baseCost * (costMultiplier^upgradeLevel)</summary>
     public int GetUpgradeCost()
     {
-        // 예: (현재 레벨 + 1) * 5 (스탯마다 커스터마이징 가능하게 확장 가능)
-        return (upgradeLevel + 1) * 5;
+        // upgradeLevel은 “현재 레벨”이므로, 다음 업그레이드 가격 = baseCost * 1.5^현재레벨
+        return Mathf.RoundToInt(baseCost * Mathf.Pow(costMultiplier, upgradeLevel));
     }
+
+    public float GetValueAtLevel(int level)
+    {
+        if (name == "ASPD")
+        {
+            float aspd = baseValue;
+            for (int i = 0; i < level; i++) aspd *= 1.02f;
+            return Mathf.Min(aspd, 3f);
+        }
+        return baseValue * (1 + 0.2f * level);
+    }
+
+    public float GetNextValue()
+    {
+        return GetValueAtLevel(upgradeLevel + 1);
+    }
+
 }

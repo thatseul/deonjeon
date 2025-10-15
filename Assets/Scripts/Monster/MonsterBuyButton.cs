@@ -1,6 +1,5 @@
 using UnityEngine;
 using UnityEngine.UI;
-using System.Collections.Generic;
 
 public class MonsterBuyButton : MonoBehaviour
 {
@@ -8,8 +7,8 @@ public class MonsterBuyButton : MonoBehaviour
     [SerializeField] private MonsterPoolManager poolManager;
 
     [Header("UI 프리팹 및 배치 대상")]
-    [SerializeField] private GameObject monsterIconPrefab;
-    [SerializeField] private RectTransform monsterInvenPanel;
+    [SerializeField] private GameObject monsterIconPrefab;       // (InventoryManager에서도 동일 프리팹 사용)
+    [SerializeField] private RectTransform monsterInvenPanel;    // ★ inventoryManager.inventoryParent와 동일 객체여야 함
     [SerializeField] private float padding = 20f;
 
     [Header("버튼 연결")]
@@ -32,43 +31,62 @@ public class MonsterBuyButton : MonoBehaviour
 
     public void OnClickBuy()
     {
-        // ✅ GameState 사용으로 통일
+        // ✅ GameState 확인
         if (GameState.I == null)
         {
             Debug.LogWarning("GameState 없음: 구매 불가");
             return;
         }
 
+        // ★ 수용량 검사 (MonsterInvenPanel 내 아이콘 수 기준)
+        if (inventoryManager == null)
+        {
+            Debug.LogWarning("❌ inventoryManager 미할당");
+            return;
+        }
+
+        int cap = GameState.I.monsterCapacityUnlocked;
+        int cur = inventoryManager.GetCurrentCount();
+        if (cur >= cap)
+        {
+            Debug.Log($"현재 소지 가능 몬스터 수 : {cap}");
+            return; // 과금/생성 중단
+        }
+
+        // 과금
         if (!GameState.I.TrySpend(cost))
         {
             Debug.Log("❌ 골드 부족!");
             return;
         }
 
-        var selectedItem = poolManager ? poolManager.GetRandomMonsterItem() : null;
+        // 뽑기
+        var selectedItem = (poolManager != null) ? poolManager.GetRandomMonsterItem() : null;
         if (selectedItem == null)
         {
             Debug.LogWarning("❗ 몬스터 뽑기 실패");
-            // 실패 시 골드 환불할 거면 아래 주석 해제
-            // GameState.I.AddGold(cost);
+            // 필요 시: GameState.I.AddGold(cost); // 환불
             return;
         }
 
-        // 인벤토리 등록 + 아이콘 생성
-        if (inventoryManager) inventoryManager.AddMonsterToInventory(selectedItem);
+        // ★ 아이콘 생성은 InventoryManager에서 '한 번만'
+        GameObject iconObj = inventoryManager.AddMonsterToInventory(selectedItem);
+        if (iconObj == null)
+        {
+            Debug.LogWarning("❌ 아이콘 생성 실패 (InventoryManager 확인 필요)");
+            return;
+        }
 
-        var icon = Instantiate(monsterIconPrefab, monsterInvenPanel);
-        icon.GetComponent<MonsterIcon>()?.SetMonsterItem(selectedItem);
+        // 패널 안 랜덤 배치 (부모가 MonsterInvenPanel이어야 함)
+        if (monsterInvenPanel != null)
+        {
+            Vector2 size = monsterInvenPanel.rect.size;
+            float x = Random.Range(padding, size.x - padding);
+            float y = Random.Range(padding, size.y - padding);
+            var rt = iconObj.GetComponent<RectTransform>();
+            if (rt != null) rt.anchoredPosition = new Vector2(x, y);
+        }
 
-        var slot = icon.GetComponent<MonsterSlot>();
-        if (slot != null) slot.SetMonster(selectedItem);
-
-        // 패널 안 랜덤 배치
-        Vector2 size = monsterInvenPanel.rect.size;
-        float x = Random.Range(padding, size.x - padding);
-        float y = Random.Range(padding, size.y - padding);
-        icon.GetComponent<RectTransform>().anchoredPosition = new Vector2(x, y);
-
-        Debug.Log($"🎁 '{selectedItem.monsterName}' 소환됨 (Cost: {cost})");
+        Debug.Log($"🎁 '{selectedItem.monsterName}' 소환됨 (Cost: {cost})  [보유 {cur + 1}/{cap}]");
     }
 }

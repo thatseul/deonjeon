@@ -15,6 +15,10 @@ public class GameState : MonoBehaviour
     DateTime _lastTickUtc;
     bool _isInMain;
 
+    [Header("몬스터 인벤 수용량")]
+    public int monsterCapacityUnlocked = 1;      // 초기 1
+    public const int monsterCapacityMax = 8;     // 상한 8
+
     void Awake()
     {
         if (I != null) { Destroy(gameObject); return; }

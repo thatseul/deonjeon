@@ -11,6 +11,12 @@ public class MonsterInventoryManager : MonoBehaviour
     [Tooltip("몬스터 아이콘 프리팹")]
     [SerializeField] private GameObject monsterIconPrefab;
 
+    public int GetCurrentCount()
+{
+    if (inventoryParent == null) return 0;
+    return inventoryParent.childCount;
+}
+
     /// <summary>
     /// 몬스터 아이콘을 인벤토리 패널에 추가함
     /// </summary>
