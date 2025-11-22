@@ -20,6 +20,10 @@ public class BossSkillManager : MonoBehaviour
     private SkillUI selectedSkillUI;
     private SkillDatabase skillDatabase;
 
+    [Header("Balance")]
+    public int drawCost = 50; // 스킬 뽑기 비용
+    public int upgradeCost = 10; // 스킬 업그레이드 비용
+
     private void Start()
     {
         skillDatabase = FindObjectOfType<SkillDatabase>();
@@ -31,6 +35,19 @@ public class BossSkillManager : MonoBehaviour
 
     public void DrawSkill()
     {
+
+        if (GameState.I == null)
+        {
+            Debug.Log("골드 부족!");
+            return;
+        }
+
+        if (!GameState.I.TrySpend(drawCost))
+        {
+            Debug.Log("골드 부족!");
+            return;
+        }
+        
         if (skillDatabase.allSkillData == null || skillDatabase.allSkillData.Count == 0)
         {
             Debug.LogError("스킬 데이터가 존재하지 않습니다.");
@@ -79,7 +96,7 @@ public class BossSkillManager : MonoBehaviour
 
         if (skillUI != null && skillUI.GetBossSkill() != null)
         {
-            selectedSkillNameText.text = $"skill: {skillUI.GetBossSkill().skillName}";
+            selectedSkillNameText.text = $"{skillUI.GetBossSkill().skillName}";
             skillUI.SetSelected(true);
         }
         else
@@ -92,6 +109,12 @@ public class BossSkillManager : MonoBehaviour
 
     public void StartMiniGameForUpgrade(BossSkill skill, SkillUI skillUI)
     {
+
+        if (!GameState.I.TrySpend(upgradeCost))
+        {
+            Debug.Log("골드 부족!");
+            return;
+        }
 
         MiniGameController miniGame = FindFirstObjectByType<MiniGameController>();
         if (miniGame != null)

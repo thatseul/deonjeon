@@ -175,7 +175,7 @@ public class MiniGameController : MonoBehaviour
 
         resultPanel.SetActive(true);
         resultText.text = isSuccess
-            ? $"Success: {currentSkill.level}"
-            : "fail";
+            ? $"Success!: {currentSkill.level}"
+            : "Fail";
     }
 }

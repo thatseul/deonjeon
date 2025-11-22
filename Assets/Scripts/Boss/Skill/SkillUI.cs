@@ -49,8 +49,11 @@ public class SkillUI : MonoBehaviour, IPointerClickHandler
         }
 
         skillNameText.text = bossSkill.skillName;
-        levelText.text = $"Lv. {bossSkill.level}, Grade. {bossSkill.grade}";
-        statText.text = $"atk {bossSkill.GetFinalAttack():F1}, cool {bossSkill.GetFinalCooldown():F1}, range {bossSkill.GetFinalRange():F1}";
+        levelText.text = $"Lv. {bossSkill.level}\n" +  $"{bossSkill.grade}";
+        statText.text =
+            $"atk {bossSkill.GetFinalAttack():F1}\n" +
+            $"cool {bossSkill.GetFinalCooldown():F1}\n" +
+            $"range {bossSkill.GetFinalRange():F1}";
 
         gameObject.SetActive(true);
     }
