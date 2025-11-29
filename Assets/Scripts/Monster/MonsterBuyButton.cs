@@ -18,7 +18,7 @@ public class MonsterBuyButton : MonoBehaviour
     [SerializeField] private MonsterInventoryManager inventoryManager;
 
     [Header("밸런스")]
-    [SerializeField] private int cost = 10; // ✅ 인스펙터에서 조절 가능
+    [SerializeField] private int cost = 10; // 인스펙터에서 조절 가능
 
     private void Start()
     {
@@ -38,19 +38,19 @@ public class MonsterBuyButton : MonoBehaviour
             return;
         }
 
-        // ★ 수용량 검사 (MonsterInvenPanel 내 아이콘 수 기준)
         if (inventoryManager == null)
         {
             Debug.LogWarning("❌ inventoryManager 미할당");
             return;
         }
 
+        // 수용량 검사
         int cap = GameState.I.monsterCapacityUnlocked;
-        int cur = inventoryManager.GetCurrentCount();
+        int cur = GameState.I.ownedMonsters.Count;
         if (cur >= cap)
         {
-            Debug.Log($"현재 소지 가능 몬스터 수 : {cap}");
-            return; // 과금/생성 중단
+            Debug.Log($"❌ 인벤토리 최대치 도달 ({cur}/{cap})");
+            return;
         }
 
         // 과금
@@ -69,7 +69,7 @@ public class MonsterBuyButton : MonoBehaviour
             return;
         }
 
-        // ★ 아이콘 생성은 InventoryManager에서 '한 번만'
+        // 인벤토리 + GameState에 등록
         GameObject iconObj = inventoryManager.AddMonsterToInventory(selectedItem);
         if (iconObj == null)
         {

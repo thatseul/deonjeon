@@ -4,104 +4,115 @@ using TMPro;
 public class DungeonUIController : MonoBehaviour
 {
     [Header("UI 요소")]
-    [SerializeField] private TextMeshProUGUI goldText;
+    public TMP_Text GoldText;
 
     [Header("업글 버튼 라벨")]
-    [SerializeField] private TextMeshProUGUI hpBtnLabel;
-    [SerializeField] private TextMeshProUGUI atkBtnLabel;
-    [SerializeField] private TextMeshProUGUI aspdBtnLabel;
+    public TMP_Text HpBtnLabel;
+    public TMP_Text AtkBtnLabel;
+    public TMP_Text AspdBtnLabel;
 
     [Header("던전 능력치 매니저")]
-    [SerializeField] private DungeonStatsManager statsManager;
+    public DungeonStatsManager StatsManager;
+
+    private void Awake()
+    {
+        if (DungeonStatsManager.Instance == null)
+        {
+        new GameObject("DungeonStatsManager").AddComponent<DungeonStatsManager>();
+        }
+
+        StatsManager = DungeonStatsManager.Instance;
+    }
 
     private void Start()
     {
-        RefreshAllUI();
+        Invoke(nameof(RefreshUI), 0.05f);
     }
 
     private void Update()
     {
-        // 간단 갱신
-        UpdateGoldUI();
+        // 골드는 실시간으로 변화하므로 Update에서 UI 업데이트
+        if (GoldText != null && GameState.I != null)
+            GoldText.text = $"Gold: {Mathf.FloorToInt((float)GameState.I.Gold)}";
     }
 
-    // ===== 버튼 클릭 =====
-    public void OnClickIncreaseAttack()
+    // UI 갱신 함수 (스탯)
+    public void RefreshUI()
     {
-        if (GameState.I == null || statsManager == null) return;
-        int cost = statsManager.GetUpgradeCost("ATK");
+        if (StatsManager == null)
+        {
+            Debug.LogWarning("DungeonUIController: StatsManager가 연결되지 않음");
+            return;
+        }
+
+        // HP
+        if (HpBtnLabel != null)
+        {
+            float cur = StatsManager.GetStatCurrentValue("HP");
+            float next = StatsManager.GetStatNextValue("HP");
+            int cost = StatsManager.GetUpgradeCost("HP");
+
+            HpBtnLabel.text =
+                $"체력(HP) 증가   Lv.{StatsManager.GetStatLevel("HP")}\n" +
+                $"{cur} → {next}   Cost {cost}";
+        }
+
+        // ATK
+        if (AtkBtnLabel != null)
+        {
+            float cur = StatsManager.GetStatCurrentValue("ATK");
+            float next = StatsManager.GetStatNextValue("ATK");
+            int cost = StatsManager.GetUpgradeCost("ATK");
+
+            AtkBtnLabel.text =
+                $"공격력 증가   Lv.{StatsManager.GetStatLevel("ATK")}\n" +
+                $"{cur} → {next}   Cost {cost}";
+        }
+
+        // ASPD
+        if (AspdBtnLabel != null)
+        {
+            float cur = StatsManager.GetStatCurrentValue("ASPD");
+            float next = StatsManager.GetStatNextValue("ASPD");
+            int cost = StatsManager.GetUpgradeCost("ASPD");
+
+            AspdBtnLabel.text =
+                $"공격속도 증가   Lv.{StatsManager.GetStatLevel("ASPD")}\n" +
+                $"{cur:F2} → {next:F2}   Cost {cost}";
+        }
+    }
+
+    // 버튼이 눌렸을 때 호출되는 함수 (UI → DungeonStatsManager)
+    public void OnClickIncreaseHP()
+    {
+        if (StatsManager == null) return;
+        int cost = StatsManager.GetUpgradeCost("HP");
         if (GameState.I.TrySpend(cost))
         {
-            Debug.Log($"💥 공격력 증가! -{cost}");
-            statsManager.UpgradeStat("ATK");
-            RefreshAllUI();
+            StatsManager.UpgradeStat("HP");
+            RefreshUI();
         }
-        else Debug.Log("❌ 골드 부족!");
     }
 
-    public void OnClickIncreaseHp()
+    public void OnClickIncreaseATK()
     {
-        if (GameState.I == null || statsManager == null) return;
-        int cost = statsManager.GetUpgradeCost("HP");
+        if (StatsManager == null) return;
+        int cost = StatsManager.GetUpgradeCost("ATK");
         if (GameState.I.TrySpend(cost))
         {
-            Debug.Log($"❤️ 체력 증가! -{cost}");
-            statsManager.UpgradeStat("HP");
-            RefreshAllUI();
+            StatsManager.UpgradeStat("ATK");
+            RefreshUI();
         }
-        else Debug.Log("❌ 골드 부족!");
     }
 
-    public void OnClickIncreaseSpeed()
+    public void OnClickIncreaseASPD()
     {
-        if (GameState.I == null || statsManager == null) return;
-        // ASPD 상한(3f)은 기존 Manager에서 검사됨
-        int cost = statsManager.GetUpgradeCost("ASPD");
+        if (StatsManager == null) return;
+        int cost = StatsManager.GetUpgradeCost("ASPD");
         if (GameState.I.TrySpend(cost))
         {
-            Debug.Log($"⚡ 공속 증가! -{cost}");
-            statsManager.UpgradeStat("ASPD");
-            RefreshAllUI();
+            StatsManager.UpgradeStat("ASPD");
+            RefreshUI();
         }
-        else Debug.Log("❌ 골드 부족!");
-    }
-
-    // ===== UI 갱신 =====
-    private void RefreshAllUI()
-    {
-        UpdateGoldUI();
-        UpdateUpgradeLabels();
-    }
-
-    private void UpdateGoldUI()
-    {
-        if (goldText && GameState.I != null)
-            goldText.text = $"Gold: {Mathf.FloorToInt((float)GameState.I.Gold)}";
-    }
-
-    private void UpdateUpgradeLabels()
-    {
-        if (statsManager == null) return;
-
-        int hpLv = statsManager.GetStatLevel("HP");
-        int atkLv = statsManager.GetStatLevel("ATK");
-        int aspdLv = statsManager.GetStatLevel("ASPD");
-
-        int hpCost = statsManager.GetUpgradeCost("HP");
-        int atkCost = statsManager.GetUpgradeCost("ATK");
-        int aspdCost = statsManager.GetUpgradeCost("ASPD");
-
-        float hpCur = statsManager.GetStatCurrentValue("HP");
-        float hpNext = statsManager.GetStatNextValue("HP");
-        float atkCur = statsManager.GetStatCurrentValue("ATK");
-        float atkNext = statsManager.GetStatNextValue("ATK");
-        float spdCur = statsManager.GetStatCurrentValue("ASPD");
-        float spdNext = statsManager.GetStatNextValue("ASPD");
-
-        string F(float v, bool isSpeed = false) => isSpeed ? v.ToString("0.00") : Mathf.RoundToInt(v).ToString("N0");
-
-        if (hpBtnLabel) hpBtnLabel.text = $"체력(HP) 증가        Lv.{hpLv}\n{F(hpCur)} → {F(hpNext)}      Cost {hpCost}";
-        if (atkBtnLabel) atkBtnLabel.text = $"공격력 증가          Lv.{atkLv}\n{F(atkCur)} → {F(atkNext)}    Cost {atkCost}";
-        if (aspdBtnLabel) aspdBtnLabel.text = $"공격속도 증가        Lv.{aspdLv}\n{F(spdCur, true)} → {F(spdNext, true)}  Cost {aspdCost}";
     }
 }

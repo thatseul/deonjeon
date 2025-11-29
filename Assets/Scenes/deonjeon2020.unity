@@ -325,11 +325,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f67e999217737104c94f57737a99a78c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  goldText: {fileID: 1435312129}
-  hpBtnLabel: {fileID: 1823770534}
-  atkBtnLabel: {fileID: 1904487033}
-  aspdBtnLabel: {fileID: 1255608008}
-  statsManager: {fileID: 1211088906}
+  GoldText: {fileID: 1435312129}
+  HpBtnLabel: {fileID: 1823770534}
+  AtkBtnLabel: {fileID: 1904487033}
+  AspdBtnLabel: {fileID: 1255608008}
+  StatsManager: {fileID: 0}
 --- !u!1 &107814597
 GameObject:
   m_ObjectHideFlags: 0
@@ -496,7 +496,7 @@ MonoBehaviour:
       m_Calls:
       - m_Target: {fileID: 72073452}
         m_TargetAssemblyTypeName: DungeonUIController, Assembly-CSharp
-        m_MethodName: OnClickIncreaseSpeed
+        m_MethodName: OnClickIncreaseASPD
         m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
@@ -724,6 +724,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   inventoryParent: {fileID: 726619716}
   monsterIconPrefab: {fileID: 3273166095094507123, guid: 0926d986f5545394c94d1005777535d3, type: 3}
+  padding: 20
 --- !u!4 &308870410
 Transform:
   m_ObjectHideFlags: 0
@@ -1583,11 +1584,13 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   summonPosition: {fileID: 629107740}
-  statsManager: {fileID: 1211088906}
+  spawnOffsetX: 0.8
+  statsManager: {fileID: 0}
   slotImage: {fileID: 948720834}
   slotHighlight: {fileID: 1486503696}
   dungeonSlotManager: {fileID: 481509871}
   inventoryManager: {fileID: 0}
+  slotIndex: 2
 --- !u!114 &681795395
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -2592,7 +2595,7 @@ AudioSource:
   m_Enabled: 1
   serializedVersion: 4
   OutputAudioMixerGroup: {fileID: 0}
-  m_audioClip: {fileID: 8300000, guid: 30bf12e1bb104854bb09d8256b6ac350, type: 3}
+  m_audioClip: {fileID: 0}
   m_Resource: {fileID: 8300000, guid: 30bf12e1bb104854bb09d8256b6ac350, type: 3}
   m_PlayOnAwake: 1
   m_Volume: 0.341
@@ -2725,7 +2728,13 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   Gold: 0
   PassiveIncomePerSecond: 0
+  ownedMonsters: []
   monsterCapacityUnlocked: 1
+  quickSlotItems:
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  dungeonStats: []
 --- !u!4 &1067919839
 Transform:
   m_ObjectHideFlags: 0
@@ -2890,7 +2899,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 99c7375a23583144c92bb82f7becfbd9, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  statsManager: {fileID: 1211088906}
+  statsManager: {fileID: 0}
   hpBar: {fileID: 1415895342}
 --- !u!50 &1111550356
 Rigidbody2D:
@@ -3289,53 +3298,6 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!1 &1211088904
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 1211088905}
-  - component: {fileID: 1211088906}
-  m_Layer: 0
-  m_Name: DungeonStatsManager
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!4 &1211088905
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1211088904}
-  serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 540, y: 960, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
-  m_Children: []
-  m_Father: {fileID: 0}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &1211088906
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1211088904}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 7a03b106e07447340a94c81a9d9d31ed, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  dungeonLevel: 1
-  stats: []
-  upgradeThreshold: 3
 --- !u!1 &1255608006
 GameObject:
   m_ObjectHideFlags: 0
@@ -3719,7 +3681,7 @@ MonoBehaviour:
       m_Calls:
       - m_Target: {fileID: 72073452}
         m_TargetAssemblyTypeName: DungeonUIController, Assembly-CSharp
-        m_MethodName: OnClickIncreaseAttack
+        m_MethodName: OnClickIncreaseATK
         m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
@@ -3866,7 +3828,7 @@ MonoBehaviour:
       m_Calls:
       - m_Target: {fileID: 72073452}
         m_TargetAssemblyTypeName: DungeonUIController, Assembly-CSharp
-        m_MethodName: OnClickIncreaseHp
+        m_MethodName: OnClickIncreaseHP
         m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
@@ -4082,7 +4044,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 1}
   m_AnchorMax: {x: 0, y: 1}
-  m_AnchoredPosition: {x: 69.6, y: -85.8}
+  m_AnchoredPosition: {x: 69.600586, y: -85.799805}
   m_SizeDelta: {x: 100, y: 100}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1435312129
@@ -4808,11 +4770,13 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   summonPosition: {fileID: 1185966175}
-  statsManager: {fileID: 1211088906}
+  spawnOffsetX: 0.8
+  statsManager: {fileID: 0}
   slotImage: {fileID: 548686558}
   slotHighlight: {fileID: 52559999}
   dungeonSlotManager: {fileID: 481509871}
-  inventoryManager: {fileID: 0}
+  inventoryManager: {fileID: 308870409}
+  slotIndex: 0
 --- !u!114 &1765991129
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -5664,11 +5628,13 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   summonPosition: {fileID: 1391049428}
-  statsManager: {fileID: 1211088906}
+  spawnOffsetX: 0.8
+  statsManager: {fileID: 0}
   slotImage: {fileID: 720848341}
   slotHighlight: {fileID: 1790518121}
   dungeonSlotManager: {fileID: 481509871}
   inventoryManager: {fileID: 0}
+  slotIndex: 1
 --- !u!114 &1994580478
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -5807,7 +5773,6 @@ SceneRoots:
   - {fileID: 1752017164}
   - {fileID: 72073451}
   - {fileID: 308870410}
-  - {fileID: 1211088905}
   - {fileID: 481509872}
   - {fileID: 919068086}
   - {fileID: 916342370}
