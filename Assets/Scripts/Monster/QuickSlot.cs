@@ -2,83 +2,182 @@ using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.EventSystems;
 
-/// <summary>
-/// 퀵슬롯: 몬스터 드롭/소환/삭제 및 UI 관리
-/// </summary>
 public class QuickSlot : MonoBehaviour, IDropHandler, IPointerClickHandler
 {
-    [Header("몬스터 소환 위치")]
+    [Header("몬스터 스폰")]
     [SerializeField] private Transform summonPosition;
+    [SerializeField] private float spawnOffsetX = 0.8f;
 
-    [Header("던전 능력치 매니저")]
+    [Header("던전 스탯")]
     [SerializeField] private DungeonStatsManager statsManager;
 
-    [Header("퀵슬롯 이미지")]
+    [Header("UI")]
     [SerializeField] private Image slotImage;
-
-    [Header("선택 UI")]
     [SerializeField] private GameObject slotHighlight;
 
+    [Header("매니저")]
     [SerializeField] private DungeonSlotManager dungeonSlotManager;
     [SerializeField] private MonsterInventoryManager inventoryManager;
 
-    private GameObject summonedMonster;    // 현재 슬롯에서 소환된 몬스터
-    private MonsterItem currentItem;       // 현재 슬롯에 배치된 아이템
+    [Header("슬롯 인덱스")]
+    [SerializeField] private int slotIndex = -1;
+
+    private GameObject summonedMonster;
+    private MonsterItem currentItem;
+
+
+    /* ============================================================
+       ⬇️  자동 참조 연결
+    ============================================================ */
+
+    private void Awake()
+    {
+        if (statsManager == null)
+            statsManager = DungeonStatsManager.Instance;
+
+        if (inventoryManager == null)
+            inventoryManager = FindObjectOfType<MonsterInventoryManager>();
+
+        if (dungeonSlotManager == null)
+            dungeonSlotManager = FindObjectOfType<DungeonSlotManager>();
+    }
 
     private void Start()
     {
-        if (slotHighlight != null)
-            slotHighlight.SetActive(false);
+        slotHighlight?.SetActive(false);
+        RestoreFromGameState();
     }
+
+
+    /* ============================================================
+       ⬇️  저장된 슬롯 복원
+    ============================================================ */
+
+    private void RestoreFromGameState()
+    {
+        if (GameState.I == null) return;
+        if (slotIndex < 0) return;
+
+        MonsterItem saved = GameState.I.GetQuickSlotItem(slotIndex);
+        if (saved == null) return;
+
+        // 인벤 존재 여부와는 상관없이, 퀵슬롯은 독립적으로 복원
+        currentItem = saved;
+
+        SpawnFieldMonster();
+        UpdateSlotVisual(saved);
+    }
+
+
+    /* ============================================================
+       ⬇️  필드 몬스터 스폰
+    ============================================================ */
+
+    private void SpawnFieldMonster()
+    {
+        if (summonPosition == null) return;
+        if (currentItem == null || currentItem.monsterPrefab == null) return;
+        if (statsManager == null) return;
+
+        // 기존 소환 몬스터 정리
+        if (summonedMonster != null)
+        {
+            Destroy(summonedMonster);
+            summonedMonster = null;
+        }
+
+        Vector3 pos = summonPosition.position + new Vector3(spawnOffsetX, 0f, 0f);
+        summonedMonster = Instantiate(currentItem.monsterPrefab, pos, Quaternion.identity);
+
+        Monster monster = summonedMonster.GetComponent<Monster>();
+        if (monster != null)
+        {
+            float hp = statsManager.GetStatValue("HP");
+            float atk = statsManager.GetStatValue("ATK");
+            float aspd = statsManager.GetStatValue("ASPD");
+
+            monster.Init(hp, atk, aspd, currentItem.statScaleRatio);
+            monster.SetQuickSlotOwner(this);
+        }
+    }
+
+
+    /* ============================================================
+       ⬇️  슬롯 UI 갱신
+    ============================================================ */
+
+    private void UpdateSlotVisual(MonsterItem item)
+    {
+        if (slotImage == null) return;
+
+        if (item != null && item.monsterIcon != null)
+        {
+            slotImage.sprite = item.monsterIcon;
+            slotImage.color = Color.white;
+        }
+        else
+        {
+            slotImage.sprite = null;
+            slotImage.color = new Color(1, 1, 1, 0);
+        }
+    }
+
+
+    /* ============================================================
+       ⬇️  드래그 드롭 (인벤 → 퀵슬롯)
+    ============================================================ */
 
     public void OnDrop(PointerEventData eventData)
     {
         var dragged = eventData.pointerDrag;
         if (dragged == null) return;
 
-        var itemSlot = dragged.GetComponent<MonsterSlot>();
-        if (itemSlot == null) return;
+        var slot = dragged.GetComponent<MonsterSlot>();
+        if (slot == null) return;
 
-        MonsterItem item = itemSlot.GetAssignedMonster();
+        MonsterItem item = slot.GetAssignedMonster();
         if (item == null || item.monsterPrefab == null) return;
 
-        // 기존 몬스터 제거
+        // 1) 기존 퀵슬롯 몬스터 제거 (퀵슬롯/필드만 비움, 인벤X)
         DeleteMonster();
 
-        // 새 몬스터 생성
-        summonedMonster = Instantiate(item.monsterPrefab, summonPosition.position, Quaternion.identity);
-        var monster = summonedMonster.GetComponent<Monster>();
-        if (monster != null)
+        // 2) 인벤 데이터 1개 감소 (UI는 아직 그대로)
+        if (inventoryManager != null)
         {
-            float hp   = statsManager.GetStatValue("HP");
-            float atk  = statsManager.GetStatValue("ATK");
-            float aspd = statsManager.GetStatValue("ASPD");
-            monster.Init(hp, atk, aspd, item.statScaleRatio);
-            monster.SetQuickSlotOwner(this);
+            inventoryManager.RemoveOneIcon(item);
         }
 
-        // 퀵슬롯 UI 표시
-        if (slotImage != null)
-        {
-            slotImage.sprite = item.monsterIcon;
-            slotImage.color  = Color.white;
-        }
-
-        currentItem = item;
-
-        // ✅ 인벤토리 아이콘 삭제 (드래그한 아이콘)
+        // 3) 드래그하던 아이콘 UI 제거 (실제 화면에서 사라지는 부분)
         var draggable = dragged.GetComponent<DraggableMonster>();
         if (draggable != null)
+        {
             draggable.ConsumeAndDestroy();
+        }
+
+        // 4) 퀵슬롯에 세팅 + 필드 몬스터 소환
+        currentItem = item;
+        SpawnFieldMonster();
+        UpdateSlotVisual(item);
+
+        // 5) GameState 퀵슬롯 저장
+        if (GameState.I != null)
+            GameState.I.SetQuickSlotItem(slotIndex, item);
     }
+
+    /* ============================================================
+       ⬇️  슬롯 선택
+    ============================================================ */
 
     public void OnPointerClick(PointerEventData eventData)
     {
-        if (slotHighlight != null)
-            slotHighlight.SetActive(true);
-
-        dungeonSlotManager.SelectSlot(this);
+        slotHighlight?.SetActive(true);
+        dungeonSlotManager?.SelectSlot(this);
     }
+
+
+    /* ============================================================
+       ⬇️  슬롯 정리 (퀵슬롯만 비움)
+    ============================================================ */
 
     public void DeleteMonster()
     {
@@ -88,37 +187,31 @@ public class QuickSlot : MonoBehaviour, IDropHandler, IPointerClickHandler
             summonedMonster = null;
         }
 
-        // 인벤토리 아이콘이 남았을 경우 (혹시 삭제 안 된 경우)
-        if (currentItem != null && inventoryManager != null)
-        {
-            inventoryManager.RemoveOneIcon(currentItem);
-            currentItem = null;
-        }
+        currentItem = null;
+
+        if (GameState.I != null)
+            GameState.I.SetQuickSlotItem(slotIndex, null);
 
         ClearSlot();
     }
 
     public void ClearSlot()
     {
-        if (slotImage != null)
-        {
-            slotImage.sprite = null;
-            slotImage.color  = new Color(1, 1, 1, 0);
-        }
-
+        UpdateSlotVisual(null);
         Deselect();
-        Debug.Log("🧼 슬롯 클리어됨");
     }
 
-    public void Highlight()
-    {
-        if (slotHighlight != null)
-            slotHighlight.SetActive(true);
-    }
+    public void Highlight() => slotHighlight?.SetActive(true);
+    public void Deselect() => slotHighlight?.SetActive(false);
 
-    public void Deselect()
+
+    /* ============================================================
+       ⬇️  몬스터 사망 콜백 (Monster.cs → Die()에서 호출)
+    ============================================================ */
+
+    public void OnMonsterDied(Monster monster)
     {
-        if (slotHighlight != null)
-            slotHighlight.SetActive(false);
+        // 죽어도 인벤에는 영향 없음 (이미 인벤에서 빠진 상태)
+        DeleteMonster();
     }
 }
