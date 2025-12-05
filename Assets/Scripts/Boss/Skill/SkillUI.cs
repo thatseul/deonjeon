@@ -31,6 +31,8 @@ public class SkillUI : MonoBehaviour, IPointerClickHandler
         upgradeButton.onClick.RemoveAllListeners();
         upgradeButton.onClick.AddListener(() =>
         {
+            Debug.Log("SkillUI 인스턴스 ID: " + GetInstanceID());
+
             skillManager.StartMiniGameForUpgrade(bossSkill, this);
         });
 
@@ -71,7 +73,6 @@ public class SkillUI : MonoBehaviour, IPointerClickHandler
 
         SetSelected(false);
     }
-
     public BossSkill GetBossSkill()
     {
         return bossSkill;

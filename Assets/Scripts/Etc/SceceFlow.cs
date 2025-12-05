@@ -6,6 +6,7 @@ public class SceneFlow : MonoBehaviour
 {
     [SerializeField] string mainSceneName = "deonjeon2020";
     [SerializeField] string bossSceneName = "BossScene";
+    [SerializeField] string startSceneName = "StartScene";
     bool busy;
 
     public void GoBoss()
@@ -36,6 +37,12 @@ public class SceneFlow : MonoBehaviour
         if (main.IsValid() && main.isLoaded)
             yield return SceneManager.UnloadSceneAsync(main);
 
+        
+        // 4) 처음 언로드
+        var start = SceneManager.GetSceneByName(startSceneName);
+        if (start.IsValid() && start.isLoaded)
+            yield return SceneManager.UnloadSceneAsync(start);
+
         busy = false;
     }
 
@@ -53,6 +60,11 @@ public class SceneFlow : MonoBehaviour
         var boss = SceneManager.GetSceneByName(bossSceneName);
         if (boss.IsValid() && boss.isLoaded)
             yield return SceneManager.UnloadSceneAsync(boss);
+
+        // 3) 처음 언로드
+        var start = SceneManager.GetSceneByName(startSceneName);
+        if (start.IsValid() && start.isLoaded)
+            yield return SceneManager.UnloadSceneAsync(start);
 
         busy = false;
     }

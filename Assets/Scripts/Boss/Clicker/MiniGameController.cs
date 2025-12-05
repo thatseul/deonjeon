@@ -1,18 +1,29 @@
 using System.Collections;
 using UnityEngine;
 using TMPro;
+using UnityEngine.EventSystems;
+using UnityEngine.UI;
 
 public class MiniGameController : MonoBehaviour
 {
+    [Header("Mini Game")]
     public GameObject goodTargetPrefab;
     public GameObject badTargetPrefab;
     public Transform spawnArea;
+
+    [Header("UI")]
+    public GameObject skillUIPanel; 
+    public GameObject miniUIPanel;  
     public TMP_Text scoreText;
     public TMP_Text timerText;
     public GameObject resultPanel;
     public TMP_Text resultText;
+    public Button retryButton;
+    public Button quitButton;
 
-    public int currentDungeonLevel = 5; // 기본값
+    [Header("Balance")]
+    public int currentDungeonLevel = 5; // 기본값 현재 던절레벨에서 연동해와야됨
+    public int retryCost = 100;        // 다시하기 할 때 차감할 골드
     private int score = 0;
     private float timeLimit = 15f;
     private int round = 1;
@@ -24,14 +35,15 @@ public class MiniGameController : MonoBehaviour
 
     public void StartMiniGame(BossSkill skill, SkillUI ui = null)
     {
+        skillUIPanel?.SetActive(false); // 스킬 UI 전체 숨김
+        resultPanel?.SetActive(false);
+        miniUIPanel.SetActive(true);
         gameObject.SetActive(true);
+        
         currentSkill = skill;
         linkedUI = ui;
         score = 0;
         round = 1;
-
-        if (resultPanel != null)
-            resultPanel.SetActive(false);
 
         gameCoroutine = StartCoroutine(RunRound());
     }
@@ -73,10 +85,63 @@ public class MiniGameController : MonoBehaviour
             }
         }
 
-    currentSkill.LevelUp(currentDungeonLevel);
-    EndGame(true);
+        currentSkill.LevelUp(currentDungeonLevel);
+        EndGame(true);
     }
 
+    void OnRetry()
+    {
+        Debug.Log("111111.");
+        // 골드 체크
+        if (GameState.I == null)
+        {
+            Debug.Log("골드 부족!");
+            return;
+        }
+
+        if (!GameState.I.TrySpend(retryCost))
+        {
+            Debug.Log("골드 부족!");
+            return;
+        }
+
+        ClearTargets();
+
+        // 결과 패널 숨기기
+        resultPanel.SetActive(false);
+
+        // 게임 재시작
+        if (gameCoroutine != null)
+            StopCoroutine(gameCoroutine);
+
+        score = 0;
+        round = 1;
+        gameCoroutine = StartCoroutine(RunRound());
+    }
+
+    void OnQuit()
+    {
+        // 게임 완전히 제거
+        if (gameCoroutine != null)
+        {
+            StopCoroutine(gameCoroutine);
+            gameCoroutine = null;   
+        }     
+
+        ClearTargets();
+        
+        // 결과 패널 숨기기
+        resultPanel.SetActive(false);
+
+        // 미니게임 UI 끄기
+        miniUIPanel.SetActive(false);
+
+        // 다시 스킬 UI 보여주기
+        skillUIPanel.SetActive(true);
+
+        // 스킬 UI 갱신
+        linkedUI?.RefreshUI();
+    }
 
     void SpawnTargets()
     {
@@ -174,6 +239,13 @@ public class MiniGameController : MonoBehaviour
         }
 
         resultPanel.SetActive(true);
+
+        retryButton.onClick.RemoveAllListeners();
+        retryButton.onClick.AddListener(OnRetry);
+
+        quitButton.onClick.RemoveAllListeners();
+        quitButton.onClick.AddListener(OnQuit);
+
         resultText.text = isSuccess
             ? $"Success!: {currentSkill.level}"
             : "Fail";
