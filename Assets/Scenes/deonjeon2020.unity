@@ -145,7 +145,7 @@ Transform:
   m_GameObject: {fileID: 32594496}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: -1}
+  m_LocalPosition: {x: 0.24, y: 1.26, z: -1}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -399,7 +399,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: 0, y: 0}
+  m_AnchoredPosition: {x: -3.6000025, y: 99.00003}
   m_SizeDelta: {x: 100, y: 100}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!222 &162142352
@@ -778,7 +778,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: 356, y: -639.51}
+  m_AnchoredPosition: {x: 358.99997, y: -750.93005}
   m_SizeDelta: {x: 242, y: 132.61}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &313033717
@@ -925,7 +925,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: 0, y: 0}
+  m_AnchoredPosition: {x: -3.6000025, y: 99.00003}
   m_SizeDelta: {x: 100, y: 100}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!1 &431894508
@@ -1165,7 +1165,7 @@ Transform:
   m_GameObject: {fileID: 455593213}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -15.2, y: 0, z: -1}
+  m_LocalPosition: {x: -15.11, y: 1.26, z: -1}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -2089,7 +2089,7 @@ SpriteRenderer:
   m_SortingLayer: 0
   m_SortingOrder: 0
   m_Sprite: {fileID: 7482667652216324306, guid: 48e93eef0688c4a259cb0eddcd8661f7, type: 3}
-  m_Color: {r: 0.20698875, g: 0.20136172, b: 0.23584908, a: 1}
+  m_Color: {r: 0.96862745, g: 1, b: 0.91764706, a: 1}
   m_FlipX: 0
   m_FlipY: 0
   m_DrawMode: 0
@@ -2172,6 +2172,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   mainSceneName: deonjeon2020
   bossSceneName: BossScene
+  startSceneName: StartScene
 --- !u!1 &919068084
 GameObject:
   m_ObjectHideFlags: 0
@@ -2723,7 +2724,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 1067919837}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: b7c3b116da2cca049a2f0dd3afff402d, type: 3}
+  m_Script: {fileID: 11500000, guid: 9dd9f1497d23d7e42af0aaa6ce9c5595, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   Gold: 0
@@ -2835,7 +2836,7 @@ Transform:
   m_GameObject: {fileID: 1111550351}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -3.62, y: 4.75, z: 0}
+  m_LocalPosition: {x: -3.44, y: 5.4, z: 0}
   m_LocalScale: {x: 0.48848, y: 0.5348198, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -3955,7 +3956,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0}
   m_AnchorMax: {x: 0.5, y: 0}
-  m_AnchoredPosition: {x: -367.02423, y: 1068}
+  m_AnchoredPosition: {x: -317, y: 1235}
   m_SizeDelta: {x: 330, y: 60}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1415895342
@@ -4419,7 +4420,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: 2, y: -824.58}
+  m_AnchoredPosition: {x: 5, y: -936}
   m_SizeDelta: {x: 950, y: 130}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1625335676
@@ -4688,7 +4689,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: -380.4, y: 0}
+  m_AnchoredPosition: {x: -384, y: 99}
   m_SizeDelta: {x: 100, y: 100}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1764184064
@@ -5465,7 +5466,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: 388.1, y: 25}
+  m_AnchoredPosition: {x: 384.5, y: 124.00003}
   m_SizeDelta: {x: 270, y: 68.3}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1986987572
